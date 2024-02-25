@@ -1,0 +1,68 @@
+﻿@page
+@model CustomerModel
+
+<div class="container">
+    <div class="search-bar">
+        <input type="text" id="customerSearch" placeholder="Suche...">
+        <button class="btn" id="searchButton">Suchen</button>
+    </div>
+
+    <div class="content">
+        <div class="customer-list">
+            <h2>Kunden</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Vorname</th>
+                        <th>Nachname</th>
+                        <th>Aktion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.IsNewCustomerFormVisible)
+                    {
+                        <tr>
+
+                            <form method="post">
+                            <td></td>
+                            <td>
+                                <input type="text" name="firstName" placeholder="Vorname">
+                            </td>
+                            <td>
+                                <input type="text" name="lastName" placeholder="Nachname">
+                            </td>
+                            <td><button type="submit" class="btn btn-outline-success" asp-page-handler="AddCustomer">Senden</button></td>
+                            </form>
+                        </tr>
+
+                    }
+                    @foreach (var customer in Model.CustomerList)
+                    {
+                        <tr>
+                            <td>@customer.ID</td>
+                            <td>@customer.FirstName</td>
+                            <td>@customer.LastName</td>
+                            <td style="display: flex;">
+                                <form method="post" style="margin-right: 20px;">
+                                    <input type="hidden" name="customerId" value="@customer.ID" />
+                                    <a href="/NewOrder?customerId=@customer.ID" class="btn btn-outline-primary">Neue Bestellung</a>
+                                </form>
+                                <form method="post" onsubmit="return confirm('Sind Sie sicher, dass Sie @customer.FirstName @customer.LastName löschen möchten?');" asp-page-handler="DeleteCustomer">
+                                    <input type="hidden" name="customerId" value="@customer.ID" />
+                                    <button type="submit" class="btn btn-outline-danger">löschen</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <p style="color:red">@Model.ErrorMessage</p>
+        </div>
+    </div>
+    <div class="actions">
+        <form method="post">
+            <button type="submit" class="btn btn-outline-primary" asp-page-handler="ToggleNewCustomerForm">Neuer Kunde</button>
+        </form>
+    </div>
+</div>
