@@ -25,19 +25,17 @@
         {
             return await _context.Set<T>().Where(predicate).ToListAsync();
         }
-        // Neuen Kunden hinzufügen
-        public async Task AddCustomer(CustomersTable customer)
+        public async Task AddDataToTable<T>(T entity) where T : class
         {
-            _context.Customers.Add(customer);
+            _context.Set<T>().Add(entity);
             await _context.SaveChangesAsync();
-            Console.WriteLine(customer.FirstName);
         }
-        public async Task DeleteCustomer(int customerId)
+        public async Task DeleteDataFromTable<T>(int id) where T : class
         {
-            var customer = await _context.Customers.FindAsync(customerId);
-            if (customer != null)
+            var entity = await _context.Set<T>().FindAsync(id);
+            if (entity != null)
             {
-                _context.Customers.Remove(customer);
+                _context.Set<T>().Remove(entity);
                 await _context.SaveChangesAsync();
             }
         }
@@ -55,6 +53,7 @@
             if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
             {
                 connectionString = "Data Source=C:\\Users\\ofran\\OneDrive\\Dokumente\\Visual Studio 2022\\SQLite\\brodworschdapp_db.db";
+                //connectionString = "Data Source=/home/admin/brodworschdapp/sqlite/brodworschdapp_db.db";
             }
             else
             {
@@ -86,6 +85,10 @@
         public int ID { get; set; }
         public string? ProductName { get; set; }
         public string? Description { get; set; }
+        public float? Price { get; set; }
+        public int? Inventory { get; set; }
+        public float? Size { get; set; }
+        public string? Unit { get; set; }
         // Sie können hier weitere Eigenschaften hinzufügen, die eine Bestellung haben könnte
     }
 }
