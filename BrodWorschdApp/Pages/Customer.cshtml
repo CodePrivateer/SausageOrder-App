@@ -2,14 +2,14 @@
 @model CustomerModel
 
 <div class="container">
-    <div class="search-bar">
-        <input type="text" id="customerSearch" placeholder="Suche...">
-        <button class="btn" id="searchButton">Suchen</button>
-    </div>
-
     <div class="content">
         <div class="customer-list">
             <h2>Kunden</h2>
+            <div class="actions">
+                <form method="post">
+                    <button type="submit" class="btn btn-outline-primary" asp-page-handler="ToggleNewCustomerForm">Neuer Kunde</button>
+                </form>
+            </div>
             <table class="table">
                 <thead>
                     <tr>
@@ -59,10 +59,5 @@
             </table>
             <p style="color:red">@Model.ErrorMessage</p>
         </div>
-    </div>
-    <div class="actions">
-        <form method="post">
-            <button type="submit" class="btn btn-outline-primary" asp-page-handler="ToggleNewCustomerForm">Neuer Kunde</button>
-        </form>
     </div>
 </div>

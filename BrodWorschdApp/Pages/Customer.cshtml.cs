@@ -20,7 +20,7 @@ public class CustomerModel : BasePageModel
         {
             var newCustomer = new CustomersTable { FirstName = firstName, LastName = lastName };
             // Kunde hinzufügen
-            await _databaseHandler.AddCustomer(newCustomer);
+            await _databaseHandler.AddDataToTable(newCustomer);
         }
         else
         {
@@ -31,7 +31,7 @@ public class CustomerModel : BasePageModel
     }
     public async Task OnPostDeleteCustomerAsync(int customerId)
     {
-        await _databaseHandler.DeleteCustomer(customerId);
+        await _databaseHandler.DeleteDataFromTable<CustomersTable>(customerId);
         await OnGetAsync();
     }
 
