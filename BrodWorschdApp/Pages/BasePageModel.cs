@@ -7,7 +7,7 @@ namespace BrodWorschdApp.Pages
         protected readonly DatabaseHandler _databaseHandler;
         protected readonly ILogger _logger;
         public List<CustomersTable> CustomerList { get; set; }
-        public List<CustomerOrdersTable> CustomerOrderList { get; set; }
+        public List<ProductsTable> ProductList { get; set; }
         public string ErrorMessage { get; set; }
 
         public BasePageModel(DatabaseHandler databaseHandler, ILogger<BasePageModel> logger)
@@ -15,7 +15,7 @@ namespace BrodWorschdApp.Pages
             _databaseHandler = databaseHandler;
             _logger = logger;
             CustomerList = new List<CustomersTable>();
-            CustomerOrderList = new List<CustomerOrdersTable>();
+            ProductList = new List<ProductsTable>();
             ErrorMessage = string.Empty;
         }
     }

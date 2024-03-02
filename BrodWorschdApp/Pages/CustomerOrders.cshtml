@@ -1,0 +1,149 @@
+﻿@page
+@model CustomerOrdersModel
+@{
+}
+<script>
+    function checkInput() {
+        // Überprüfen Sie, welcher Button gedrückt wurde
+        var formAction = document.activeElement.getAttribute('formaction');
+        if (formAction.endsWith('SubmitOrder')) {
+            var username = document.getElementById('username').value;
+            if (username == '') {
+                alert('Bitte geben Sie einen Benutzernamen ein.');
+                return false;
+            }
+        }
+        return true;
+    }
+</script>
+
+<h2>Bestellungen @Model.OrderStatus</h2>
+<div class="container">
+    <div class="content">
+        <div class="products-list">
+            <div class="actions">
+                <form method="post">
+                    <input type="hidden" name="customerId" value="@Model.CustomerId" />
+                    <button type="submit" class="btn btn-outline-primary" asp-page-handler="ToggleNewOrderForm">Neue Bestellung</button>
+                </form>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Kunden ID</th>
+                        <th>Vorname</th>
+                        <th>Nachname</th>
+                        @if (Model.OrderNumber != string.Empty)
+                        {
+                            <th>Bestellnummer</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var customer in Model.CustomerList)
+                    {
+                        <tr>
+                            <td>@customer.ID</td>
+                            <td>@customer.FirstName</td>
+                            <td>@customer.LastName</td>
+                            @if (Model.OrderNumber != string.Empty)
+                            {
+                                <td>@Model.OrderNumber</td>
+                            }                            
+                        </tr>
+                    }
+                    <tr></tr>
+                </tbody>
+            </table>
+            @if (Model.IsNewOrderFormVisible)
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Produkt</th>
+                            <th>Preis</th>
+                            <th>Größe</th>
+                            <th>Einheit</th>
+                            <th>Lagermenge</th>
+                            <th>Bestellmenge</th>
+                            <th>Kosten</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <form method="post" onsubmit="return checkInput();">
+                            @foreach (var product in Model.ProductList)
+                            {
+                                var orderItem = Model.CalculatedOrder.FirstOrDefault(o => o.ProductId == product.ID);
+                            <tr>
+                                <td>@product.ID</td>
+                                <td>@product.ProductName</td>
+                                <td>@product.Price?.ToString("C")</td>
+                                <td>@product.Size</td>
+                                <td>@product.Unit</td>
+                                <td>@product.Inventory</td>
+                                <td>
+                                    <input type="number" min="0" name="orderQuantity[@product.ID]" id="quantity_@product.ID" value="@orderItem?.Quantity" />
+                                </td>
+                                <td style="text-align: right;">@(orderItem?.Cost.ToString("C") ?? "")</td>
+                            </tr>
+                            }
+                        <tr>
+                            <td colspan="7" style="text-align: right;">Gesamtsumme</td>
+                            <td style="text-align: right;">@Model.CalculatedOrder.Sum(item => item.Cost).ToString("C")</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td colspan="8" style="display: flex;">
+                                <input type="hidden" name="customerId" value="@Model.CustomerId" />
+                                <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
+                                <button type="submit" formaction="?handler=CancelAction" style="margin-right: 10px;" class="btn btn-outline-primary">Abbrechen</button>
+                                <button type="submit" formaction="?handler=CalculateCosts" style="margin-right: 10px;" class="btn btn-outline-primary">Berechnen</button>
+                                <button type="submit" formaction="?handler=SubmitOrder" style="margin-right: 10px;" class="btn btn-outline-primary">Senden</button>
+                                <label class="col-form-label-lg" for="userName" style="margin-right: 10px;">Benutzername: </label>
+                                <input type="text" id="username" name="userName" />
+                            </td>
+                            <td></td>
+                        </tr>
+                        </form>
+                    </tbody>
+                </table>
+            }else
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Bestellnummer</th>
+                            <th>Bestellzeit</th>
+                            <th>Bearbeiter</th>
+                            <th>Bestellkosten</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model.GroupedOrdersList)
+                        {
+                            <tr>
+                                <td>@order.OrderNumber</td>
+                                <td>@order.Items.First().Date</td>
+                                <td>@order.Items.First().UserName</td>
+                                <td>@order.TotalPrice.ToString("C")</td>
+                                <td style="display: flex;">
+                                    <form method="post" style="margin-right: 10px;" asp-page-handler="ToggleEditOrderForm">
+                                        <input type="hidden" name="orderNumber" value="@order.OrderNumber" />
+                                        <button type="submit" class="btn btn-outline-primary">Bearbeiten</button>
+                                    </form>
+                                    <form method="post" onsubmit="return confirm('Sind Sie sicher, dass Sie Bestellung @order.OrderNumber löschen möchten?');" asp-page-handler="DeleteOrder">
+                                        <input type="hidden" name="customerId" value="@Model.CustomerId" />
+                                        <input type="hidden" name="orderNumber" value="@order.OrderNumber" />
+                                        <button type="submit" class="btn btn-outline-danger">löschen</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            }
+        </div>
+    </div>
+</div>

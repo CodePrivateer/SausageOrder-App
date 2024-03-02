@@ -37,6 +37,24 @@
                         </tr>
 
                     }
+                    @if (Model.IsEditCustomerFormVisible)
+                    {
+                        <tr>
+                            @foreach (var customer in Model.CustomerList)
+                            {
+                                <form method="post">
+                                <td></td>
+                                <td><input type="text" name="firstName" placeholder="Vorname" value="@customer.FirstName"></td>
+                                <td><input type="text" name="lastName" placeholder="Nachname" value="@customer.LastName"></td>
+                                <input type="hidden" name="customerId" value="@customer.ID" />
+                                <td style="display: flex;">
+                                    <button type="submit" class="btn btn-outline-success" style="margin-right: 10px;" asp-page-handler="EditCustomer">Senden</button>
+                                    <button type="submit" class="btn btn-outline-primary" asp-page-handler="CancelEditCustomer">Abbrechen</button>
+                                </td>
+                                </form>
+                            }
+                        </tr>
+                    }
                     @foreach (var customer in Model.CustomerList)
                     {
                         <tr>
@@ -44,9 +62,13 @@
                             <td>@customer.FirstName</td>
                             <td>@customer.LastName</td>
                             <td style="display: flex;">
-                                <form method="post" style="margin-right: 20px;">
+                                <form method="post" style="margin-right: 10px;">
                                     <input type="hidden" name="customerId" value="@customer.ID" />
-                                    <a href="/NewOrder?customerId=@customer.ID" class="btn btn-outline-primary">Neue Bestellung</a>
+                                    <a href="/CustomerOrders?customerId=@customer.ID" class="btn btn-outline-primary">Bestellungen</a>
+                                </form>
+                                <form method="post" style="margin-right: 10px;" asp-page-handler="ToggleEditCustomerForm">
+                                    <input type="hidden" name="customerId" value="@customer.ID" />
+                                    <button type="submit" class="btn btn-outline-primary">Bearbeiten</button>
                                 </form>
                                 <form method="post" onsubmit="return confirm('Sind Sie sicher, dass Sie @customer.FirstName @customer.LastName löschen möchten?');" asp-page-handler="DeleteCustomer">
                                     <input type="hidden" name="customerId" value="@customer.ID" />

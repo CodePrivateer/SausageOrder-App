@@ -25,11 +25,19 @@
         {
             return await _context.Set<T>().Where(predicate).ToListAsync();
         }
+
         public async Task AddDataToTable<T>(T entity) where T : class
         {
             _context.Set<T>().Add(entity);
             await _context.SaveChangesAsync();
         }
+
+        public async Task UpdateDataInTable<T>(T entity) where T : class
+        {
+            _context.Set<T>().Update(entity);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task DeleteDataFromTable<T>(int id) where T : class
         {
             var entity = await _context.Set<T>().FindAsync(id);
@@ -39,11 +47,21 @@
                 await _context.SaveChangesAsync();
             }
         }
+
+        // Customer Bestellungen auflisten
+        public async Task<List<CustomerOrdersTable>> GetCustomerOrdersWithDetails(Expression<Func<CustomerOrdersTable, bool>> predicate)
+        {
+            return await _context.CustomerOrders
+                .Include(co => co.Customer)
+                .Where(predicate)
+                .ToListAsync();
+        }
+
     }
     public class DatabaseContext : DbContext
     {
         public DbSet<CustomersTable> Customers { get; set; }
-        public DbSet<CustomerOrdersTable> Orders { get; set; }
+        public DbSet<CustomerOrdersTable> CustomerOrders { get; set; }
         public DbSet<ProductsTable> Products { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -74,17 +92,19 @@
     public class CustomerOrdersTable
     {
         public int ID { get; set; }
-        public string CustomerID { get; set; }
-        public string ProductID { get; set; }
+        public string OrderNumber { get; set; }
+        public int CustomerId { get; set; }
+        public int ProductId { get; set; }
+        public int Quantity { get; set; }
+        public string Date { get; set; }
+        public string UserName { get; set; }
         public virtual CustomersTable Customer { get; set; }
-        public virtual ProductsTable Product { get; set; }
         // Sie können hier weitere Eigenschaften hinzufügen, die eine Bestellung haben könnte
     }
     public class ProductsTable
     {
         public int ID { get; set; }
         public string? ProductName { get; set; }
-        public string? Description { get; set; }
         public float? Price { get; set; }
         public int? Inventory { get; set; }
         public float? Size { get; set; }

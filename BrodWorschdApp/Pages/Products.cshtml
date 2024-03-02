@@ -1,0 +1,89 @@
+﻿@page
+@model ProductsModel
+@{
+    ViewData["Title"] = "Produkte";
+}
+<h1>@ViewData["Title"]</h1>
+
+<div class="container">
+    <div class="content">
+        <div class="products-list">
+            <div class="actions">
+                <form method="post">
+                    <button type="submit" class="btn btn-outline-primary" asp-page-handler="ToggleNewProductForm">Neues Produkt</button>
+                </form>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Produkt</th>
+                        <th>Preis</th>
+                        <th>Größe</th>
+                        <th>Einheit</th>
+                        <th>Lagermenge</th>
+                        <th>Aktion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.IsNewProductFormVisible)
+                    {
+                        <tr>
+                            <form method="post">
+                            <td></td>
+                            <td><input type="text" name="productName" placeholder="Produktbezeichnung"></td>
+                            <td><input type="text" name="productPrice" placeholder="Preis"></td>
+                            <td><input type="text" name="productSize" placeholder="Größe"></td>
+                            <td><input type="text" name="productSizeUnit" placeholder="Einheit"></td>
+                            <td><input type="text" name="productInventory" placeholder="Lagermenge"></td>
+                            <td><button type="submit" class="btn btn-outline-success" asp-page-handler="AddProduct">Senden</button></td>
+                            </form>
+                        </tr>
+                    }
+                    @if (Model.IsEditProductFormVisible)
+                    {
+                        <tr>
+                            @foreach (var product in Model.ProductList)
+                            {
+                                <form method="post">
+                                <td></td>
+                                <td><input type="text" name="productName" placeholder="Produktbezeichnung" value="@product.ProductName"></td>
+                                <td><input type="text" name="productPrice" placeholder="Preis" value="@product.Price"></td>
+                                <td><input type="text" name="productSize" placeholder="Größe" value="@product.Size"></td>
+                                <td><input type="text" name="productSizeUnit" placeholder="Einheit" value="@product.Unit"></td>
+                                <td><input type="text" name="productInventory" placeholder="Lagermenge" value="@product.Inventory"></td>
+                                <input type="hidden" name="productId" value="@product.ID" />
+                                <td style="display: flex;">
+                                    <button type="submit" class="btn btn-outline-success" style="margin-right: 10px;" asp-page-handler="EditProduct">Senden</button>
+                                    <button type="submit" class="btn btn-outline-primary" asp-page-handler="CancelEditProduct">Abbrechen</button>
+                                </td>
+                                </form>
+                            }
+                        </tr>
+                    }
+                    @foreach (var product in Model.ProductList)
+                    {
+                        <tr>
+                            <td>@product.ID</td>
+                            <td>@product.ProductName</td>
+                            <td>@product.Price</td>
+                            <td>@product.Size</td>
+                            <td>@product.Unit</td>
+                            <td>@product.Inventory</td>
+                            <td style="display: flex;">
+                                <form method="post" style="margin-right: 10px;" asp-page-handler="ToggleEditProductForm">
+                                    <input type="hidden" name="productId" value="@product.ID" />
+                                    <button type="submit" class="btn btn-outline-primary">Bearbeiten</button>
+                                </form>
+                                <form method="post" onsubmit="return confirm('Sind Sie sicher, dass Sie Produkt Nr.: @product.ID - @product.ProductName löschen möchten, wenn Bestellungen vorhanden sind werden diese auch gelöscht?');" asp-page-handler="DeleteProduct">
+                                    <input type="hidden" name="productId" value="@product.ID" />
+                                    <button type="submit" class="btn btn-outline-danger">löschen</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
