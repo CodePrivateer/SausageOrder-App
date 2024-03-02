@@ -32,7 +32,10 @@
                             <td>
                                 <input type="text" name="lastName" placeholder="Nachname">
                             </td>
-                            <td><button type="submit" class="btn btn-outline-success" asp-page-handler="AddCustomer">Senden</button></td>
+                            <td style="display: flex;">
+                                <button type="submit" class="btn btn-outline-success" style="margin-right: 10px;" asp-page-handler="AddCustomer">Senden</button>
+                                <button type="submit" class="btn btn-outline-primary" asp-page-handler="CancelCustomer">Abbrechen</button>
+                            </td>
                             </form>
                         </tr>
 
@@ -49,7 +52,7 @@
                                 <input type="hidden" name="customerId" value="@customer.ID" />
                                 <td style="display: flex;">
                                     <button type="submit" class="btn btn-outline-success" style="margin-right: 10px;" asp-page-handler="EditCustomer">Senden</button>
-                                    <button type="submit" class="btn btn-outline-primary" asp-page-handler="CancelEditCustomer">Abbrechen</button>
+                                    <button type="submit" class="btn btn-outline-primary" asp-page-handler="CancelCustomer">Abbrechen</button>
                                 </td>
                                 </form>
                             }

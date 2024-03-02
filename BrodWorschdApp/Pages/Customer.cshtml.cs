@@ -15,6 +15,12 @@ public class CustomerModel : BasePageModel
         // Hier können Sie die Kundenliste aus der Datenbank abrufen
         CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>();
     }
+    public async Task OnPostCancelCustomer()
+    {
+        IsEditCustomerFormVisible=false;
+        IsNewCustomerFormVisible =false;
+        await OnGetAsync();
+    }
     public async Task OnPostAddCustomerAsync(string firstName, string lastName)
     {
         if (!string.IsNullOrEmpty(firstName) && !string.IsNullOrEmpty(lastName))
@@ -64,10 +70,6 @@ public class CustomerModel : BasePageModel
     public void OnPostToggleNewCustomerForm()
     {
         IsNewCustomerFormVisible = !IsNewCustomerFormVisible;
-    }
-    public async Task OnPostCancelEditCustomerAsync()
-    {
-        await OnGetAsync();
     }
 }
 
