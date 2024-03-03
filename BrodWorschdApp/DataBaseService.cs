@@ -86,7 +86,7 @@
         public int ID { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
-        // Sie können hier weitere Eigenschaften hinzufügen, die ein Kunde haben könnte
+        public virtual ICollection<CustomerOrdersTable> Orders { get; set; }  // Navigationseigenschaft für Bestellungen hinzufügen
     }
 
     public class CustomerOrdersTable
@@ -111,4 +111,20 @@
         public string? Unit { get; set; }
         // Sie können hier weitere Eigenschaften hinzufügen, die eine Bestellung haben könnte
     }
+    public class GroupedOrder
+    {
+        public string OrderNumber { get; set; }
+        public List<CustomerOrdersTable> Items { get; set; }
+        public float TotalPrice { get; set; }
+        public List<ProductsTable> Products { get; set; }  // Liste der Produkte hinzufügen
+
+        public GroupedOrder()
+        {
+            OrderNumber = string.Empty;
+            Items = new List<CustomerOrdersTable>();
+            Products = new List<ProductsTable>();  // Initialisieren Sie die Liste der Produkte
+            TotalPrice = 0;
+        }
+    }
+
 }
