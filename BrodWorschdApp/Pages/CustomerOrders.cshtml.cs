@@ -7,37 +7,14 @@ namespace BrodWorschdApp.Pages
         public int Quantity { get; set; }
         public decimal Cost { get; set; }
     }
-    public class GroupedOrder
-    {
-        public string OrderNumber { get; set; }
-        public List<CustomerOrdersTable> Items { get; set; }
-        public float TotalPrice { get; set; }
-        public GroupedOrder()
-        {
-            OrderNumber = string.Empty;
-            Items = new List<CustomerOrdersTable>();
-            TotalPrice = 0;
-        }
-    }
+
     public class CustomerOrdersModel : BasePageModel
     {
-        public int CustomerId { get; set; }
-        public string OrderNumber { get; set; }
-        public string OrderStatus { get; set; }
         public bool IsEditOrderFormVisible { get; set; }
         public bool IsNewOrderFormVisible { get; set; }
-        public List<OrderItem> CalculatedOrder { get; set; }
-        public List<GroupedOrder> GroupedOrdersList { get; set; }
-        public List<CustomerOrdersTable> OrderDetails { get; set; }
-        public Dictionary<int, ProductsTable> Products { get; set; }
+
         public CustomerOrdersModel(DatabaseHandler databaseHandler, ILogger<CustomerOrdersModel> logger) : base(databaseHandler, logger)
         {
-            CalculatedOrder = new List<OrderItem>();
-            GroupedOrdersList = new List<GroupedOrder>();
-            OrderDetails = new List<CustomerOrdersTable>();
-            Products = new Dictionary<int, ProductsTable>();
-            OrderNumber = string.Empty;
-            OrderStatus = string.Empty;
         }
         public async Task OnPostToggleEditOrderForm(int customerId, string orderNumber)
         {
@@ -85,17 +62,7 @@ namespace BrodWorschdApp.Pages
 
             var orders = await _databaseHandler.GetCustomerOrdersWithDetails(co => co.CustomerId == CustomerId);
             var products = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
-
-            GroupedOrdersList = orders
-                .GroupBy(order => order.OrderNumber)
-                .Select(group => new GroupedOrder
-                {
-                    OrderNumber = group.Key,
-                    Items = group.ToList(),
-                    TotalPrice = (float)group.Sum(item => item.Quantity * (products.First(p => p.ID == item.ProductId).Price ?? 0))
-                })
-                .ToList();
-
+            GroupedOrdersList = CalculateGroupedOrders(orders, products);
             CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
         }
 
@@ -187,32 +154,47 @@ namespace BrodWorschdApp.Pages
             }
             await OnGetAsync(customerId);
         }
-
         public async Task OnPostCalculateCosts(int customerId, Dictionary<int, int> orderQuantity, string? orderNumber = null)
         {
-            CalculatedOrder = new List<OrderItem>();
             CustomerId = customerId;
-            if (orderNumber != null) {
+            CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
+            ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>();
+            IsNewOrderFormVisible = true;
+            await CalculateCost(customerId, orderQuantity);
+
+            if (orderNumber != null)
+            {
                 OrderStatus = "bearbeiten";
                 OrderNumber = orderNumber;
             }
-
-            ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>();
-            IsNewOrderFormVisible = true;
-
-            foreach (var item in orderQuantity)
-            {
-                var productId = item.Key;
-                var quantity = item.Value;
-                var product = (await _databaseHandler.GetDataFromTable<ProductsTable>(p => p.ID == productId)).FirstOrDefault();
-                if (product != null && product.Price.HasValue)
-                {
-                    var cost = (decimal)(product.Price.Value * quantity);
-                    CalculatedOrder.Add(new OrderItem { ProductId = productId, Quantity = quantity, Cost = cost });
-                }
-            }
-            CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
         }
+
+        //public async Task OnPostCalculateCosts(int customerId, Dictionary<int, int> orderQuantity, string? orderNumber = null)
+        //{
+        //    CalculatedOrder = new List<OrderItem>();
+        //    CustomerId = customerId;
+        //    ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>();
+        //    IsNewOrderFormVisible = true;
+
+        //    if (orderNumber != null)
+        //    {
+        //        OrderStatus = "bearbeiten";
+        //        OrderNumber = orderNumber;
+        //    }
+
+        //    foreach (var item in orderQuantity)
+        //    {
+        //        var productId = item.Key;
+        //        var quantity = item.Value;
+        //        var product = (await _databaseHandler.GetDataFromTable<ProductsTable>(p => p.ID == productId)).FirstOrDefault();
+        //        if (product != null && product.Price.HasValue)
+        //        {
+        //            var cost = (decimal)(product.Price.Value * quantity);
+        //            CalculatedOrder.Add(new OrderItem { ProductId = productId, Quantity = quantity, Cost = cost });
+        //        }
+        //    }
+        //    CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
+        //}
         public async Task OnPostDeleteOrder(string orderNumber, int customerId)
         {
             // Abrufen aller Bestellungen basierend auf der OrderNumber

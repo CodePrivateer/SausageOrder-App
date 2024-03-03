@@ -4,7 +4,110 @@
     ViewData["Title"] = "Home page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
+<h2>Bestellungen</h2>
+<div class="container">
+    <div class="content">
+        <div class="products-list">
+            <div class="actions">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Kunden ID</th>
+                            <th>Vorname</th>
+                            <th>Nachname</th>
+                            @if (Model.OrderNumber != string.Empty)
+                            {
+                                <th>Bestellnummer</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var customer in Model.CustomerList)
+                        {
+                            <tr>
+                                <td>@customer.ID</td>
+                                <td>@customer.FirstName</td>
+                                <td>@customer.LastName</td>
+                                @if (Model.OrderNumber != string.Empty)
+                                {
+                                    <td>@Model.OrderNumber</td>
+                                }
+                            </tr>
+                        }
+                        <tr></tr>
+                    </tbody>
+                </table>
+                @if (Model.IsOrderViewVisible)
+                {
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Produkt</th>
+                                <th>Preis</th>
+                                <th>Größe</th>
+                                <th>Einheit</th>
+                                <th>Bestellmenge</th>
+                                <th>Kosten</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var product in Model.ProductList)
+                            {
+                                var orderItem = Model.CalculatedOrder.FirstOrDefault(o => o.ProductId == product.ID);
+                                if (orderItem?.Quantity != null)
+                                {
+                                    <tr>
+                                        <td>@product.ID</td>
+                                        <td>@product.ProductName</td>
+                                        <td style="white-space: nowrap">@BasePageModel.FormatAsEuro(product.Price)</td>
+                                        <td>@product.Size</td>
+                                        <td style="white-space: nowrap">@product.Unit</td>
+                                        <td>@orderItem.Quantity</td>
+                                        <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, orderItem.Cost)</td>
+                                    </tr>
+                                }
+                            }
+                            <tr>
+                                <td colspan="6" style="text-align: right;">Gesamtsumme</td>
+                                <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, Model.CalculatedOrder.Sum(item => item.Cost))</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Bestellnummer</th>
+                                <th>Kunden-ID</th>
+                                <th>Kunde</th>
+                                <th>Bestellkosten</th>
+                                <th>Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model.GroupedOrdersList)
+                            {
+                                <tr>
+                                    <td>@order.OrderNumber</td>
+                                    <td>@order.Items.First().CustomerId</td>
+                                    <td>@order.Items.First().Customer.FirstName @order.Items.First().Customer.LastName</td>
+                                    <td>@BasePageModel.FormatAsEuro(@order.TotalPrice)</td>
+                                    <td style="display: flex;">
+                                        <form method="post" style="margin-right: 10px;" asp-page-handler="ToggleOrderView">
+                                            <input type="hidden" name="orderNumber" value="@order.OrderNumber" />
+                                            <button type="submit" class="btn btn-outline-primary">Anzeigen</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
 
+            </div>
+        </div>
+    </div>
 </div>

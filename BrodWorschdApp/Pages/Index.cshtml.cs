@@ -3,18 +3,40 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BrodWorschdApp.Pages
 {
-    public class IndexModel : PageModel
+    public class IndexModel : BasePageModel
     {
-        private readonly ILogger<IndexModel> _logger;
 
-        public IndexModel(ILogger<IndexModel> logger)
+        public bool IsOrderViewVisible { get; set; }
+
+        public IndexModel(DatabaseHandler databaseHandler, ILogger<IndexModel> logger) : base(databaseHandler, logger)
         {
-            _logger = logger;
+            GroupedOrdersList = new List<GroupedOrder>();
         }
 
-        public void OnGet()
+        public async Task OnGetAsync()
         {
-
+            var orders = await _databaseHandler.GetCustomerOrdersWithDetails(co => true);
+            var products = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
+            GroupedOrdersList = CalculateGroupedOrders(orders, products);
         }
+        public async Task OnPostToggleOrderViewAsync(int customerId, string orderNumber)
+        {
+            IsOrderViewVisible = !IsOrderViewVisible;
+
+            var orders = await _databaseHandler.GetCustomerOrdersWithDetails(co => co.OrderNumber == orderNumber);
+            var products = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
+
+            CustomerId = customerId;
+            OrderNumber = orderNumber;
+            OrderStatus = "Anzeigen";
+
+            if (IsOrderViewVisible)
+            {
+                OrderDetails = await GetOrderDetails(orderNumber);
+            }
+            CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
+            ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>();
+        }
+
     }
 }
