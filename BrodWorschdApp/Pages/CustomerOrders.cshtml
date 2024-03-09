@@ -55,7 +55,7 @@
                     <tr></tr>
                 </tbody>
             </table>
-            @if (Model.IsNewOrderFormVisible)
+            @if (Model.IsNewOrderFormVisible || Model.IsEditOrderFormVisible)
             {
                 <form method="post" onsubmit="return checkInput();">
                     <table class="table">
@@ -90,7 +90,7 @@
                             }
                             <tr>
                                 <td colspan="7" style="text-align: right;">Gesamtsumme</td>
-                                <td style="text-align: right;">@BasePageModel.FormatAsEuro(null,Model.CalculatedOrder.Sum(item => item.Cost))</td>
+                                <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, Model.CalculatedOrder.Sum(item => item.Cost))</td>
                             </tr>
                             <tr></tr>
                         </tbody>
@@ -104,11 +104,13 @@
                                 <td colspan="8" style="display: flex;">
                                     <input type="hidden" name="customerId" value="@Model.CustomerId" />
                                     <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
-                                    <button type="submit" formaction="?handler=CancelAction" style="margin-right: 10px;" class="btn btn-outline-primary">Abbrechen</button>
                                     <button type="submit" formaction="?handler=CalculateCosts" style="margin-right: 10px;" class="btn btn-outline-primary">Berechnen</button>
                                     <button type="submit" formaction="?handler=SubmitOrder" style="margin-right: 10px;" class="btn btn-outline-success">Senden</button>
-                                    <label class="col-form-label-lg" for="userName" style="margin-right: 10px;">Benutzername: </label>
-                                    <input type="text" id="username" name="userName" />
+                                    <label class="col-form-label-lg" for="pickUpName" style="margin-right: 10px;">Abholer: </label>
+                                    <input type="text" id="pickUpName" name="pickUpName" value="@(Model.OrderDetails.FirstOrDefault()?.PickUpName ?? "Selbstabholer")" />
+                                    <label class="col-form-label-lg" for="userName" style="margin-left: 10px; margin-right: 10px;">Bearbeiter: </label>
+                                    <input type="text" id="username" name="userName" value="@(Model.OrderDetails.FirstOrDefault()?.UserName ?? "Benutzer-1")" />
+                                    <button type="submit" formaction="?handler=CancelAction" style="margin-left: 30px;" class="btn btn-outline-primary">Abbrechen</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -121,6 +123,7 @@
                     <thead>
                         <tr>
                             <th>Bestellnummer</th>
+                            <th>Abholer</th>
                             <th>Bestellzeit</th>
                             <th>Bearbeiter</th>
                             <th>Bestellkosten</th>
@@ -132,20 +135,27 @@
                         {
                             <tr>
                                 <td>@order.OrderNumber</td>
+                                <td>@order.Items.First().PickUpName</td>
                                 <td>@order.Items.First().Date</td>
                                 <td>@order.Items.First().UserName</td>
                                 <td>@BasePageModel.FormatAsEuro(@order.TotalPrice)</td>
-                                <td style="display: flex;">
-                                    <form method="post" style="margin-right: 10px;" asp-page-handler="ToggleEditOrderForm">
-                                        <input type="hidden" name="orderNumber" value="@order.OrderNumber" />
-                                        <button type="submit" class="btn btn-outline-primary">Bearbeiten</button>
-                                    </form>
-                                    <form method="post" onsubmit="return confirm('Sind Sie sicher, dass Sie Bestellung @order.OrderNumber löschen möchten?');" asp-page-handler="DeleteOrder">
-                                        <input type="hidden" name="customerId" value="@Model.CustomerId" />
-                                        <input type="hidden" name="orderNumber" value="@order.OrderNumber" />
-                                        <button type="submit" class="btn btn-outline-danger">löschen</button>
-                                    </form>
-                                </td>
+                                @if (string.IsNullOrEmpty(order.Items.First().Booked))
+                                {
+                                    <td style="display: flex;">
+                                        <form method="post" style="margin-right: 10px;" asp-page-handler="ToggleEditOrderForm">
+                                            <input type="hidden" name="orderNumber" value="@order.OrderNumber" />
+                                            <button type="submit" class="btn btn-outline-primary">Bearbeiten</button>
+                                        </form>
+                                        <form method="post" onsubmit="return confirm('Sind Sie sicher, dass Sie Bestellung @order.OrderNumber löschen möchten?');" asp-page-handler="DeleteOrder">
+                                            <input type="hidden" name="customerId" value="@Model.CustomerId" />
+                                            <input type="hidden" name="orderNumber" value="@order.OrderNumber" />
+                                            <button type="submit" class="btn btn-outline-danger">löschen</button>
+                                        </form>
+                                    </td>
+                                }else
+                                {
+                                    <td style="color: red; font-weight: bold;">Gebucht!</td>
+                                }
                             </tr>
                         }
                     </tbody>

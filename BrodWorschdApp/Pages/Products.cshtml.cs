@@ -15,6 +15,7 @@ namespace BrodWorschdApp.Pages
         public async Task OnGetAsync()
         {
             ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>();
+            OrderedQuantitiesPerProduct = await _databaseHandler.GetOrderedQuantitiesPerProduct();
         }
         public void OnPostToggleNewProductForm()
         {

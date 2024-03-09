@@ -13,9 +13,14 @@ namespace BrodWorschdApp.Pages
         public string OrderNumber { get; set; }
         public List<CustomerOrdersTable> OrderDetails { get; set; }
         public string OrderStatus { get; set; }
+        public string PickUpName { get; set; }
+        public string UserName { get; set; }
         public string ErrorMessage { get; set; }
         public Dictionary<int, ProductsTable> Products { get; set; }
+        public Dictionary<int, int> OrderedQuantitiesPerProduct { get; set; }
         public List<OrderItem> CalculatedOrder { get; set; }
+        public float TotalBookedOrdersSum { get; set; }
+        public float TotalNotBookedOrdersSum { get; set; }
 
         public BasePageModel(DatabaseHandler databaseHandler, ILogger<BasePageModel> logger)
         {
@@ -26,10 +31,13 @@ namespace BrodWorschdApp.Pages
             GroupedOrdersList = new List<GroupedOrder>();
             OrderDetails = new List<CustomerOrdersTable>();
             Products = new Dictionary<int, ProductsTable>();
+            OrderedQuantitiesPerProduct = new Dictionary<int, int>();
             CalculatedOrder = new List<OrderItem>();
             ErrorMessage = string.Empty;
             OrderNumber = string.Empty;
             OrderStatus = string.Empty;
+            UserName = string.Empty;
+            PickUpName = string.Empty;
         }
         public static string FormatAsEuro(float? valueFloat = null, decimal? valueDecimal = null)
         {
@@ -61,6 +69,22 @@ namespace BrodWorschdApp.Pages
                 })
                 .ToList();
         }
+
+        public float CalculateTotalSum(List<GroupedOrder> groupedOrders)
+        {
+            return groupedOrders
+                .Where(order => order.Items.All(item => item.Booked?.ToLower() == "booked"))
+                .Sum(order => order.TotalPrice);
+        }
+
+        public float CalculateTotalNotBookedSum(List<GroupedOrder> groupedOrders)
+        {
+            return groupedOrders
+                .Where(order => order.Items.All(item => item.Booked?.ToLower() == ""))
+                .Sum(order => order.TotalPrice);
+        }
+
+
         public async Task<List<CustomerOrdersTable>> GetOrderDetails(string orderNumber)
         {
             // Übergabe der Bestellnummer
@@ -87,6 +111,7 @@ namespace BrodWorschdApp.Pages
 
             return orders;
         }
+
         public async Task CalculateCost(int customerId, Dictionary<int, int> orderQuantity)
         {
             CustomerId = customerId;
@@ -101,6 +126,50 @@ namespace BrodWorschdApp.Pages
                     CalculatedOrder.Add(new OrderItem { ProductId = productId, Quantity = quantity, Cost = cost });
                 }
             }
+        }
+
+        public async Task OnPostFilterOrders(string customerFirstName, string customerLastName, string orderNumber)
+        {
+            var filteredOrders = new List<GroupedOrder>();
+
+            await GetGroupedOrderList();
+
+            // If no filter is provided, return all orders
+            if (!string.IsNullOrEmpty(customerFirstName) || !string.IsNullOrEmpty(customerLastName) || !string.IsNullOrEmpty(orderNumber))
+            {
+                foreach (var orderGroup in GroupedOrdersList)
+                {
+                    var customerMatches = orderGroup.Items.Any(order =>
+                        (string.IsNullOrEmpty(customerFirstName) || order.Customer?.FirstName?.ToLower().Contains(customerFirstName.ToLower()) == true) &&
+                        (string.IsNullOrEmpty(customerLastName) || order.Customer?.LastName?.ToLower().Contains(customerLastName.ToLower()) == true)
+                    );
+
+                    var orderNumberMatches = orderGroup.Items.Any(order =>
+                        (string.IsNullOrEmpty(orderNumber) || order.OrderNumber.Contains(orderNumber))
+                    );
+
+                    if (customerMatches && orderNumberMatches)
+                    {
+                        filteredOrders.Add(orderGroup);
+                    }
+                }
+                GroupedOrdersList = filteredOrders;
+            }
+            TotalBookedOrdersSum = CalculateTotalSum(GroupedOrdersList);
+            TotalNotBookedOrdersSum = CalculateTotalNotBookedSum(GroupedOrdersList);
+        }
+        public async Task GetGroupedOrderList()
+        {
+            var orders = await _databaseHandler.GetCustomerOrdersWithDetails(co => true);
+            var products = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
+            GroupedOrdersList = CalculateGroupedOrders(orders, products);
+        }
+
+        public class OrderItem
+        {
+            public int ProductId { get; set; }
+            public int Quantity { get; set; }
+            public decimal Cost { get; set; }
         }
     }
 }

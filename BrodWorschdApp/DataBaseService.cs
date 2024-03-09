@@ -31,13 +31,32 @@
             _context.Set<T>().Add(entity);
             await _context.SaveChangesAsync();
         }
-
+        // Liste ändern mit Suchkriterium oder Methode mit Prädikat
+        public async Task UpdateDataInTable<T>(Expression<Func<T, bool>> predicate, Action<T> updateAction) where T : class
+        {
+            var entities = await _context.Set<T>().Where(predicate).ToListAsync();
+            foreach (var entity in entities)
+            {
+                updateAction(entity);
+            }
+            await _context.SaveChangesAsync();
+        }
+        // Eintrag ändern mit Suchkriterium ohne Prädikat
         public async Task UpdateDataInTable<T>(T entity) where T : class
         {
             _context.Set<T>().Update(entity);
             await _context.SaveChangesAsync();
         }
 
+        // Liste löschen mit Suchkriterium oder Methode mit Prädikat
+        public async Task DeleteDataFromTable<T>(Expression<Func<T, bool>> predicate) where T : class
+        {
+            var entities = _context.Set<T>().Where(predicate);
+            _context.Set<T>().RemoveRange(entities);
+            await _context.SaveChangesAsync();
+        }
+
+        // Löschen mit einem Suchkriterium  oder Methode ohne Prädikat
         public async Task DeleteDataFromTable<T>(int id) where T : class
         {
             var entity = await _context.Set<T>().FindAsync(id);
@@ -46,6 +65,12 @@
                 _context.Set<T>().Remove(entity);
                 await _context.SaveChangesAsync();
             }
+        }
+        // Produkt mit ProduktId finden
+        public async Task<T> FindProductById<T>(int id) where T : class, new()
+        {
+            var product = await _context.Set<T>().FindAsync(id);
+            return product ?? new T();
         }
 
         // Customer Bestellungen auflisten
@@ -56,7 +81,32 @@
                 .Where(predicate)
                 .ToListAsync();
         }
-
+        // Bestellmenge je Produkt in eine Dictionary auflisten
+        public async Task<Dictionary<int, int>> GetAllOrderedQuantitiesPerProduct()
+        {
+            return await _context.CustomerOrders
+                .GroupBy(co => co.ProductId)
+                .Select(g => new { ProductId = g.Key, TotalQuantity = g.Sum(co => co.Quantity) })
+                .ToDictionaryAsync(t => t.ProductId, t => t.TotalQuantity);
+        }
+        // Nur die nicht gebuchten Bestellmenge je Produkt in eine Dictionary auflisten
+        public async Task<Dictionary<int, int>> GetOrderedQuantitiesPerProduct()
+        {
+            return await _context.CustomerOrders
+                .Where(co => string.IsNullOrEmpty(co.Booked))
+                .GroupBy(co => co.ProductId)
+                .Select(g => new { ProductId = g.Key, TotalQuantity = g.Sum(co => co.Quantity) })
+                .ToDictionaryAsync(t => t.ProductId, t => t.TotalQuantity);
+        }
+        // Nur die gebuchten Bestellmenge je Produkt in eine Dictionary auflisten
+        public async Task<Dictionary<int, int>> GetBookedQuantitiesPerProduct()
+        {
+            return await _context.CustomerOrders
+                .Where(co => co.Booked == "booked")
+                .GroupBy(co => co.ProductId)
+                .Select(g => new { ProductId = g.Key, TotalQuantity = g.Sum(co => co.Quantity) })
+                .ToDictionaryAsync(t => t.ProductId, t => t.TotalQuantity);
+        }
     }
     public class DatabaseContext : DbContext
     {
@@ -98,6 +148,8 @@
         public int Quantity { get; set; }
         public string Date { get; set; }
         public string UserName { get; set; }
+        public string? PickUpName { get; set; }
+        public string? Booked {  get; set; }
         public virtual CustomersTable Customer { get; set; }
         // Sie können hier weitere Eigenschaften hinzufügen, die eine Bestellung haben könnte
     }
@@ -117,6 +169,7 @@
         public List<CustomerOrdersTable> Items { get; set; }
         public float TotalPrice { get; set; }
         public List<ProductsTable> Products { get; set; }  // Liste der Produkte hinzufügen
+        public string? PickUpName { get; set; }
 
         public GroupedOrder()
         {

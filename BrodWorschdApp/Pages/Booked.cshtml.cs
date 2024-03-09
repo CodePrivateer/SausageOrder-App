@@ -1,28 +1,30 @@
 namespace BrodWorschdApp.Pages
 {
-    public class IndexModel : BasePageModel
+    public class BookedModel : BasePageModel
     {
 
         public bool IsOrderViewVisible { get; set; }
 
-        public IndexModel(DatabaseHandler databaseHandler, ILogger<IndexModel> logger) : base(databaseHandler, logger)
+        public BookedModel(DatabaseHandler databaseHandler, ILogger<BookedModel> logger) : base(databaseHandler, logger)
         {
         }
 
         public async Task OnGetAsync()
         {
             await GetGroupedOrderList();
-            TotalNotBookedOrdersSum = CalculateTotalNotBookedSum(GroupedOrdersList);
+            TotalBookedOrdersSum = CalculateTotalSum(GroupedOrdersList);
         }
         public async Task OnPostToggleOrderViewAsync(int customerId, string orderNumber, string isOrderViewVisible = "")
         {
             if (isOrderViewVisible == "True")
             {
                 IsOrderViewVisible = false;
-            }else if (isOrderViewVisible == "False")
+            }
+            else if (isOrderViewVisible == "False")
             {
                 IsOrderViewVisible = true;
-            }else if(string.IsNullOrEmpty(isOrderViewVisible)) 
+            }
+            else if (string.IsNullOrEmpty(isOrderViewVisible))
             {
                 IsOrderViewVisible = !IsOrderViewVisible;
             }
@@ -57,7 +59,7 @@ namespace BrodWorschdApp.Pages
 
             CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
             ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
-            
+
             await OnGetAsync();
         }
         public async Task UpdateInventoryAfterBooking(string orderNumber)

@@ -22,6 +22,10 @@
                         <th>Größe</th>
                         <th>Einheit</th>
                         <th>Lagermenge</th>
+                        @if (!Model.IsEditProductFormVisible)
+                        {
+                            <th>Reserviert</th>
+                        }
                         <th>Aktion</th>
                     </tr>
                 </thead>
@@ -70,6 +74,11 @@
                             <td>@product.Size</td>
                             <td>@product.Unit</td>
                             <td>@product.Inventory</td>
+                            @if (!Model.IsEditProductFormVisible)
+                            {
+                                <td>@(Model?.OrderedQuantitiesPerProduct?.ContainsKey(product?.ID ?? 0) ?? false ? Model.OrderedQuantitiesPerProduct[product.ID].ToString() : "0")</td>
+                            }
+
                             <td style="display: flex;">
                                 <form method="post" style="margin-right: 10px;" asp-page-handler="ToggleEditProductForm">
                                     <input type="hidden" name="productId" value="@product.ID" />

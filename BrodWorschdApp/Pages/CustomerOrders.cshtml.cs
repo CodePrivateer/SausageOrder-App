@@ -1,13 +1,6 @@
 namespace BrodWorschdApp.Pages
 
 {
-    public class OrderItem
-    {
-        public int ProductId { get; set; }
-        public int Quantity { get; set; }
-        public decimal Cost { get; set; }
-    }
-
     public class CustomerOrdersModel : BasePageModel
     {
         public bool IsEditOrderFormVisible { get; set; }
@@ -21,38 +14,16 @@ namespace BrodWorschdApp.Pages
             CustomerId = customerId;
             OrderNumber = orderNumber;
             OrderStatus = "bearbeiten";
+
             IsEditOrderFormVisible = !IsEditOrderFormVisible;
+
             if (IsEditOrderFormVisible)
             {
                 OrderDetails = await GetOrderDetails(orderNumber);
             }
+
             CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
-        }
-        public async Task<List<CustomerOrdersTable>> GetOrderDetails(string orderNumber)
-        {
-            // Übergabe der Bestellnummer
-            OrderNumber = orderNumber;
-            // Abrufen aller Produkte
-            var allProducts = await _databaseHandler.GetDataFromTable<ProductsTable>();
-            foreach (var product in allProducts)
-            {
-                if (!Products.ContainsKey(product.ID))
-                {
-                    Products.Add(product.ID, product);
-                }
-            }
-
-            // Abrufen der Bestelldaten basierend auf der OrderNumber
-            var orders = await _databaseHandler.GetDataFromTable<CustomerOrdersTable>(o => o.OrderNumber == orderNumber);
-
-            // Bestimmen Sie die customerId und orderQuantity
-            int customerId = orders.FirstOrDefault()?.CustomerId ?? 0;
-            var orderQuantity = orders.ToDictionary(o => o.ProductId, o => o.Quantity);
-
-            // Rufen Sie OnPostCalculateCosts mit den bestimmten Parametern auf
-            await OnPostCalculateCosts(customerId, orderQuantity);
-
-            return orders;
+            ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>();
         }
 
         public async Task OnGetAsync(int customerId)
@@ -86,13 +57,21 @@ namespace BrodWorschdApp.Pages
             CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
         }
 
-        public async Task OnPostSubmitOrder(Dictionary<int, int> orderQuantity, int customerId, string userName, string? orderNumber = null)
+        public async Task OnPostSubmitOrder(Dictionary<int, int> orderQuantity, int customerId, string userName, string pickUpName, string? orderNumber = null)
         {
             OrderNumber = orderNumber ?? string.Empty;
             if(userName == null || userName == "")
             {
-                ErrorMessage = "Es muss ein Bearbeiter eingetragen werden!";
+                // ErrorMessage = "Bearbeiterfeld war leer, 'Benutzer-1' eingetragen!";
+                userName = "Benutzer-1";
             }
+            if(pickUpName==null || pickUpName == "")
+            {
+                pickUpName = "Selbstabholer";
+            }
+            PickUpName = pickUpName;
+            UserName = userName;
+
             if (orderNumber == null)
             {
                 // Ermitteln Sie die maximale OrderNumber
@@ -116,25 +95,33 @@ namespace BrodWorschdApp.Pages
                 var quantity = item.Value;
 
                 // Wenn die Menge 0 ist, überspringen Sie diesen Artikel
-                if (quantity == 0)
-                {
-                    continue;
-                }
+                //if (quantity == 0)
+                //{
+                //    continue;
+                //}
 
                 // Abrufen der bestehenden Bestellung aus der Datenbank
                 var order = (await _databaseHandler.GetDataFromTable<CustomerOrdersTable>(o => o.OrderNumber == orderNumber && o.ProductId == productId)).FirstOrDefault();
 
                 if (order != null)
                 {
+                    Console.WriteLine(order.Quantity + " " + quantity);
+                    if (order.Quantity >= 0 && quantity == 0)
+                    {
+                        await _databaseHandler.DeleteDataFromTable<CustomerOrdersTable>(o => o.OrderNumber == orderNumber && o.ProductId == productId);
+                        continue;
+                    }
+
                     // Ändern Sie die Eigenschaften der Bestellung
                     order.Quantity = quantity; // Setzen Sie die Quantity
                     order.Date = DateTime.Now.ToString();
                     order.UserName = userName;
+                    order.PickUpName = pickUpName;
 
                     // Aktualisieren Sie die Bestellung in der Datenbank
                     await _databaseHandler.UpdateDataInTable(order);
                 }
-                else
+                else if (quantity != 0)
                 {
                     // Wenn die Bestellung nicht existiert, erstellen Sie eine neue
                     order = new CustomerOrdersTable
@@ -145,6 +132,7 @@ namespace BrodWorschdApp.Pages
                         Quantity = quantity, // Setzen Sie die Quantity
                         Date = DateTime.Now.ToString(),
                         UserName = userName,
+                        PickUpName = pickUpName,
                         // Sie können hier weitere Eigenschaften hinzufügen, die eine Bestellung haben könnte
                     };
 
@@ -158,43 +146,22 @@ namespace BrodWorschdApp.Pages
         {
             CustomerId = customerId;
             CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
-            ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>();
-            IsNewOrderFormVisible = true;
+            ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
+
             await CalculateCost(customerId, orderQuantity);
 
             if (orderNumber != null)
             {
                 OrderStatus = "bearbeiten";
                 OrderNumber = orderNumber;
+                IsEditOrderFormVisible = true;
+            }
+            else
+            {
+                IsNewOrderFormVisible = true;
             }
         }
 
-        //public async Task OnPostCalculateCosts(int customerId, Dictionary<int, int> orderQuantity, string? orderNumber = null)
-        //{
-        //    CalculatedOrder = new List<OrderItem>();
-        //    CustomerId = customerId;
-        //    ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>();
-        //    IsNewOrderFormVisible = true;
-
-        //    if (orderNumber != null)
-        //    {
-        //        OrderStatus = "bearbeiten";
-        //        OrderNumber = orderNumber;
-        //    }
-
-        //    foreach (var item in orderQuantity)
-        //    {
-        //        var productId = item.Key;
-        //        var quantity = item.Value;
-        //        var product = (await _databaseHandler.GetDataFromTable<ProductsTable>(p => p.ID == productId)).FirstOrDefault();
-        //        if (product != null && product.Price.HasValue)
-        //        {
-        //            var cost = (decimal)(product.Price.Value * quantity);
-        //            CalculatedOrder.Add(new OrderItem { ProductId = productId, Quantity = quantity, Cost = cost });
-        //        }
-        //    }
-        //    CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
-        //}
         public async Task OnPostDeleteOrder(string orderNumber, int customerId)
         {
             // Abrufen aller Bestellungen basierend auf der OrderNumber
