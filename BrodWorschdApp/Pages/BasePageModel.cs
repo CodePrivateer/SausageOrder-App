@@ -19,8 +19,10 @@ namespace BrodWorschdApp.Pages
         public Dictionary<int, ProductsTable> Products { get; set; }
         public Dictionary<int, int> OrderedQuantitiesPerProduct { get; set; }
         public List<OrderItem> CalculatedOrder { get; set; }
+        public float TotalOrdersSum { get; set; }
         public float TotalBookedOrdersSum { get; set; }
         public float TotalNotBookedOrdersSum { get; set; }
+        public float TotalPaidSum { get; set; }
 
         public BasePageModel(DatabaseHandler databaseHandler, ILogger<BasePageModel> logger)
         {
@@ -39,6 +41,7 @@ namespace BrodWorschdApp.Pages
             UserName = string.Empty;
             PickUpName = string.Empty;
         }
+
         public static string FormatAsEuro(float? valueFloat = null, decimal? valueDecimal = null)
         {
             if (valueFloat.HasValue)
@@ -57,6 +60,21 @@ namespace BrodWorschdApp.Pages
             }
         }
 
+        //public List<GroupedOrder> CalculateGroupedOrders(List<CustomerOrdersTable> orders, List<ProductsTable> products)
+        //{
+        //    return orders
+        //        .GroupBy(order => order.OrderNumber)
+        //        .Select(group => new GroupedOrder
+        //        {
+        //            OrderNumber = group.Key,
+        //            Items = group.ToList(),
+        //            TotalPrice = (float)group.Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductId)?.Price ?? 0)),
+        //            TotalDelivered = (float)group.Where(item => item.Booked?.ToLower() == "booked").Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductId)?.Price ?? 0)),
+        //            TotalOpen = (float)group.Where(item => item.Booked?.ToLower() == "").Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductId)?.Price ?? 0)),
+        //            TotalPaid = (float)group.Where(item => item.Paid?.ToLower() == "paid").Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductId)?.Price ?? 0))
+        //        })
+        //        .ToList();
+        //}
         public List<GroupedOrder> CalculateGroupedOrders(List<CustomerOrdersTable> orders, List<ProductsTable> products)
         {
             return orders
@@ -65,25 +83,32 @@ namespace BrodWorschdApp.Pages
                 {
                     OrderNumber = group.Key,
                     Items = group.ToList(),
-                    TotalPrice = (float)group.Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductId)?.Price ?? 0))
+                    TotalPrice = (float)group.Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductId)?.Price ?? 0)),
+                    TotalDelivered = (float)group.Where(item => (item.Booked ?? "").ToLower() == "booked").Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductId)?.Price ?? 0)),
+                    TotalOpen = (float)group.Where(item => (item.Booked ?? "").ToLower() == "").Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductId)?.Price ?? 0)),
+                    TotalPaid = (float)group.Where(item => (item.Paid ?? "").ToLower() == "paid").Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductId)?.Price ?? 0))
                 })
                 .ToList();
         }
 
-        public float CalculateTotalSum(List<GroupedOrder> groupedOrders)
+        public float CalculateTotalPaidSum(List<GroupedOrder> groupedOrders)
         {
-            return groupedOrders
-                .Where(order => order.Items.All(item => item.Booked?.ToLower() == "booked"))
-                .Sum(order => order.TotalPrice);
+            return groupedOrders.Sum(order => order.TotalPaid);
+        }
+
+        public float CalculateTotalBookedSum(List<GroupedOrder> groupedOrders)
+        {
+            return groupedOrders.Sum(order => order.TotalDelivered);
         }
 
         public float CalculateTotalNotBookedSum(List<GroupedOrder> groupedOrders)
         {
-            return groupedOrders
-                .Where(order => order.Items.All(item => item.Booked?.ToLower() == ""))
-                .Sum(order => order.TotalPrice);
+            return groupedOrders.Sum(order => order.TotalOpen);
         }
-
+        public float CalculateTotal(List<GroupedOrder> groupedOrders)
+        {
+            return groupedOrders.Sum(order => order.TotalPrice);
+        }
 
         public async Task<List<CustomerOrdersTable>> GetOrderDetails(string orderNumber)
         {
@@ -115,6 +140,8 @@ namespace BrodWorschdApp.Pages
         public async Task CalculateCost(int customerId, Dictionary<int, int> orderQuantity)
         {
             CustomerId = customerId;
+            CalculatedOrder.Clear();
+
             foreach (var item in orderQuantity)
             {
                 var productId = item.Key;
@@ -128,20 +155,21 @@ namespace BrodWorschdApp.Pages
             }
         }
 
-        public async Task OnPostFilterOrders(string customerFirstName, string customerLastName, string orderNumber)
+        public async Task OnPostFilterOrders(string customerFirstName, string customerLastName, string orderNumber, string pickUpName)
         {
             var filteredOrders = new List<GroupedOrder>();
 
             await GetGroupedOrderList();
 
             // If no filter is provided, return all orders
-            if (!string.IsNullOrEmpty(customerFirstName) || !string.IsNullOrEmpty(customerLastName) || !string.IsNullOrEmpty(orderNumber))
+            if (!string.IsNullOrEmpty(customerFirstName) || !string.IsNullOrEmpty(customerLastName) || !string.IsNullOrEmpty(orderNumber) || !string.IsNullOrEmpty(pickUpName))
             {
                 foreach (var orderGroup in GroupedOrdersList)
                 {
                     var customerMatches = orderGroup.Items.Any(order =>
                         (string.IsNullOrEmpty(customerFirstName) || order.Customer?.FirstName?.ToLower().Contains(customerFirstName.ToLower()) == true) &&
-                        (string.IsNullOrEmpty(customerLastName) || order.Customer?.LastName?.ToLower().Contains(customerLastName.ToLower()) == true)
+                        (string.IsNullOrEmpty(customerLastName) || order.Customer?.LastName?.ToLower().Contains(customerLastName.ToLower()) == true) &&
+                        (string.IsNullOrEmpty(pickUpName) || order.PickUpName?.ToLower().Contains(pickUpName.ToLower()) == true)
                     );
 
                     var orderNumberMatches = orderGroup.Items.Any(order =>
@@ -155,14 +183,108 @@ namespace BrodWorschdApp.Pages
                 }
                 GroupedOrdersList = filteredOrders;
             }
-            TotalBookedOrdersSum = CalculateTotalSum(GroupedOrdersList);
+            await GetSums(false);
+        }
+        public async Task GetSums(bool refreshData = true)
+        {
+            if(refreshData) 
+            {
+                await GetGroupedOrderList();
+            }
+
+            TotalBookedOrdersSum = CalculateTotalBookedSum(GroupedOrdersList);
             TotalNotBookedOrdersSum = CalculateTotalNotBookedSum(GroupedOrdersList);
+            TotalOrdersSum = CalculateTotal(GroupedOrdersList);
+            TotalPaidSum = CalculateTotalPaidSum(GroupedOrdersList);
         }
         public async Task GetGroupedOrderList()
         {
             var orders = await _databaseHandler.GetCustomerOrdersWithDetails(co => true);
             var products = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
             GroupedOrdersList = CalculateGroupedOrders(orders, products);
+        }
+
+        public async Task UpdateInventoryAfterStornoItem(string orderNumber, int productId) // Einzelne Position der Bestellung
+        {
+            // Holen Sie sich die Details der Bestellung
+            var orderDetails = await GetOrderDetails(orderNumber);
+
+            // Finden Sie das entsprechende Produkt in der ProductsTable
+            var product = await _databaseHandler.FindProductById<ProductsTable>(productId);
+
+            // Finden Sie die Bestellung mit der gegebenen productId
+            var order = orderDetails.FirstOrDefault(o => o.ProductId == productId);
+
+            // Aktualisieren Sie das Inventory des Produkts
+            if (product != null && product.Inventory != null && order != null && order.Booked == "")
+            {
+                product.Inventory += order.Quantity; // Addiere die stornierte Menge wieder zum Inventar hinzu
+
+                // Speichern Sie die Änderungen in der Datenbank
+                await _databaseHandler.UpdateDataInTable<ProductsTable>(product);
+            }
+        }
+        public async Task UpdateInventoryAfterBookingItem(string orderNumber, int productId) // Einzelne Position der Bestellung
+        {
+            // Holen Sie sich die Details der Bestellung
+            var orderDetails = await GetOrderDetails(orderNumber);
+
+            // Finden Sie das entsprechende Produkt in der ProductsTable
+            var product = await _databaseHandler.FindProductById<ProductsTable>(productId);
+
+            // Finden Sie die Bestellung mit der gegebenen productId
+            var order = orderDetails.FirstOrDefault(o => o.ProductId == productId);
+
+            // Aktualisieren Sie das Inventory des Produkts
+            if (product != null && product.Inventory != null && order != null && order.Booked == "booked")
+            {
+                product.Inventory -= order.Quantity; // Addiere die stornierte Menge wieder zum Inventar hinzu
+
+                // Speichern Sie die Änderungen in der Datenbank
+                await _databaseHandler.UpdateDataInTable<ProductsTable>(product);
+            }
+        }
+        public async Task UpdateInventoryAfterBooking(string orderNumber) // Ganze Bestellung
+        {
+            // Holen Sie sich die Details der Bestellung
+            var orderDetails = await GetOrderDetails(orderNumber);
+
+            // Durchlaufen Sie jedes Produkt in der Bestellung
+            foreach (var order in orderDetails)
+            {
+                // Finden Sie das entsprechende Produkt in der ProductsTable
+                var product = await _databaseHandler.FindProductById<ProductsTable>(order.ProductId);
+
+                // Aktualisieren Sie das Inventory des Produkts
+                if (product != null && product.Inventory != null && order.Booked == "booked")
+                {
+                    product.Inventory -= order.Quantity;
+
+                    // Speichern Sie die Änderungen in der Datenbank
+                    await _databaseHandler.UpdateDataInTable<ProductsTable>(product);
+                }
+            }
+        }
+        public async Task UpdateInventoryAfterCancellation(string orderNumber) // Ganze Bestellung
+        {
+            // Holen Sie sich die Details der stornierten Bestellung
+            var orderDetails = await GetOrderDetails(orderNumber);
+
+            // Durchlaufen Sie jedes Produkt in der stornierten Bestellung
+            foreach (var order in orderDetails)
+            {
+                // Finden Sie das entsprechende Produkt in der ProductsTable
+                var product = await _databaseHandler.FindProductById<ProductsTable>(order.ProductId);
+
+                // Aktualisieren Sie das Inventory des Produkts
+                if (product != null && product.Inventory != null)
+                {
+                    product.Inventory += order.Quantity;
+
+                    // Speichern Sie die Änderungen in der Datenbank
+                    await _databaseHandler.UpdateDataInTable<ProductsTable>(product);
+                }
+            }
         }
 
         public class OrderItem

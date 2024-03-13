@@ -47,6 +47,37 @@
             _context.Set<T>().Update(entity);
             await _context.SaveChangesAsync();
         }
+        public async Task UpdateOrderItemStatus(string orderNumber, int productId, string status = "booked")
+        {
+            // Find the order
+            var order = await _context.Set<CustomerOrdersTable>()
+                .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber && o.ProductId == productId);
+
+            if (order != null)
+            {
+                // Update the status
+                order.Booked = status;
+
+                // Save the changes
+                await UpdateDataInTable(order);
+            }
+        }
+        public async Task UpdateOrderItemPayStatus(string orderNumber, int productId, string status = "paid")
+        {
+            // Find the order
+            var order = await _context.Set<CustomerOrdersTable>()
+                .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber && o.ProductId == productId);
+
+            if (order != null)
+            {
+                // Update the status
+                order.Paid = status;
+
+                // Save the changes
+                await UpdateDataInTable(order);
+            }
+        }
+
 
         // Liste löschen mit Suchkriterium oder Methode mit Prädikat
         public async Task DeleteDataFromTable<T>(Expression<Func<T, bool>> predicate) where T : class
@@ -120,12 +151,13 @@
 
             if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
             {
-                connectionString = "Data Source=C:\\Users\\ofran\\OneDrive\\Dokumente\\Visual Studio 2022\\SQLite\\brodworschdapp_db.db";
-                //connectionString = "Data Source=/home/admin/brodworschdapp/sqlite/brodworschdapp_db.db";
+                // Verwenden Sie den relativen Pfad zur SQLite-Datei in Ihrem Projektordner
+                // connectionString = $"Data Source={Path.Combine(Directory.GetCurrentDirectory(), "BrodWorschdApp", "SqliteDB", "brodworschdapp_db.db")}";
+                connectionString = "Data Source=C:\\Users\\ofran\\OneDrive\\Dokumente\\Visual Studio 2022\\repos\\BrodWorschdApp\\BrodWorschdApp\\SqliteDB\\brodworschdapp_db.db";
             }
             else
             {
-                connectionString = "Data Source=/home/admin/brodworschdapp/sqlite/brodworschdapp_db.db";
+                connectionString = "Data Source=/home/admin/brodworschdapp/SqliteDB/brodworschdapp_db.db";
             }
 
             optionsBuilder.UseSqlite(connectionString);
@@ -150,6 +182,7 @@
         public string UserName { get; set; }
         public string? PickUpName { get; set; }
         public string? Booked {  get; set; }
+        public string? Paid { get; set; }
         public virtual CustomersTable Customer { get; set; }
         // Sie können hier weitere Eigenschaften hinzufügen, die eine Bestellung haben könnte
     }
@@ -168,6 +201,9 @@
         public string OrderNumber { get; set; }
         public List<CustomerOrdersTable> Items { get; set; }
         public float TotalPrice { get; set; }
+        public float TotalDelivered { get; set; }
+        public float TotalOpen { get; set; }
+        public float TotalPaid { get; set; }
         public List<ProductsTable> Products { get; set; }  // Liste der Produkte hinzufügen
         public string? PickUpName { get; set; }
 

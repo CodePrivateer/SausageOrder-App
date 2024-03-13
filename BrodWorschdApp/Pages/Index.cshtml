@@ -23,7 +23,7 @@
                                 <th>Kunden ID</th>
                                 <th>Vorname</th>
                                 <th>Nachname</th>
-                                <th>Abholer</th>
+                                <th>Pate</th>
                                 @if (Model.OrderNumber != string.Empty)
                                 {
                                     <th>Bestellnummer</th>
@@ -37,7 +37,7 @@
                                     <td>@customer.ID</td>
                                     <td>@customer.FirstName</td>
                                     <td>@customer.LastName</td>
-                                    <td>@(Model.GroupedOrdersList.First().PickUpName ?? "Selbstabholer")</td>
+                                    <td>@(Model.OrderDetails.First().PickUpName ?? "Selbstabholer")</td>
                                     @if (Model.OrderNumber != string.Empty)
                                     {
                                         <td>@Model.OrderNumber</td>
@@ -57,6 +57,8 @@
                                 <th>Einheit</th>
                                 <th>Bestellmenge</th>
                                 <th>Kosten</th>
+                                <th>Liefern</th>
+                                <th>Zahlen</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -73,20 +75,66 @@
                                         <td style="white-space: nowrap">@product.Unit</td>
                                         <td>@orderItem.Quantity</td>
                                         <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, orderItem.Cost)</td>
+                                        @if (Model.OrderDetails.FirstOrDefault(o => o.ProductId == product.ID)?.Booked != "booked")
+                                        {
+                                            <td>
+                                                <form method="post" style="margin-right: 10px;" asp-page-handler="BookOrderItem">
+                                                    <input type="hidden" name="productId" value="@product.ID" />
+                                                    <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
+                                                    <input type="hidden" name="customerId" value="@Model.CustomerId" />
+                                                    <button type="submit" class="btn btn-outline-primary">Teil-Liefern</button>
+                                                </form>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td>
+                                                <form method="post" style="margin-right: 10px;" onsubmit="return confirm('Sind Sie sicher, dass Sie für @product.ProductName die Lieferung zurücknehmen möchten?');" asp-page-handler="StornoOrderItem">
+                                                    <input type="hidden" name="productId" value="@product.ID" />
+                                                    <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
+                                                    <input type="hidden" name="customerId" value="@Model.CustomerId" />
+                                                    <button type="submit" class="btn btn-outline-danger">Teil-Rückliefern</button>
+                                                </form>
+                                            </td>
+                                        }
+                                        @if (Model.OrderDetails.FirstOrDefault(o => o.ProductId == product.ID)?.Paid != "paid")
+                                        {
+                                            <td>
+                                                <form method="post" style="margin-right: 10px;" asp-page-handler="PayOrderItem">
+                                                    <input type="hidden" name="productId" value="@product.ID" />
+                                                    <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
+                                                    <input type="hidden" name="customerId" value="@Model.CustomerId" />
+                                                    <button type="submit" class="btn btn-outline-primary">Teil-Bezahlen</button>
+                                                </form>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td>
+                                                <form method="post" style="margin-right: 10px;" onsubmit="return confirm('Sind Sie sicher, dass Sie für @product.ProductName die Bezahlung zurücknehmen möchten?');" asp-page-handler="StornoPayOrderItem">
+                                                    <input type="hidden" name="productId" value="@product.ID" />
+                                                    <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
+                                                    <input type="hidden" name="customerId" value="@Model.CustomerId" />
+                                                    <button type="submit" class="btn btn-outline-danger">Teil-Storno</button>
+                                                </form>
+                                            </td>
+                                        }
                                     </tr>
                                 }
                             }
                             <tr>
-                                @if (Model.OrderDetails.First().Booked != "booked")
+                                @{
+                                    var order = Model.GroupedOrdersList.FirstOrDefault(o => o.OrderNumber == Model.OrderNumber);
+                                }
+                                @if (order != null && order.TotalOpen > 0)
                                 {
                                     <td colspan="1">
                                         <form method="post" style="margin-right: 10px;" asp-page-handler="BookOrder">
                                             <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
                                             <input type="hidden" name="customerId" value="@Model.CustomerId" />
-                                            <button type="submit" class="btn btn-outline-primary">Buchen</button>
+                                            <button type="submit" class="btn btn-outline-primary">Gesamt-Liefern</button>
                                         </form>
                                     </td>
-                                    <td></td>
                                 }
                                 else
                                 {
@@ -94,12 +142,31 @@
                                         <form method="post" style="margin-right: 10px;" onsubmit="return confirm('Sind Sie sicher, dass Sie für Bestellung @Model.OrderNumber die Buchung zurücknehmen möchten?');" asp-page-handler="StornoOrder">
                                             <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
                                             <input type="hidden" name="customerId" value="@Model.CustomerId" />
-                                            <button type="submit" class="btn btn-outline-danger">Storno</button>
+                                            <button type="submit" class="btn btn-outline-danger">Gesamt-Rückliefern</button>
                                         </form>
                                     </td>
-                                    <td style="font-size: 20px; color: red; font-weight: bold;">Bestellung ist gebucht!</td>
                                 }
-                                <td colspan="4" style="text-align: right;">Gesamtsumme</td>
+                                @if (order != null && order.TotalPaid != order.TotalPrice)
+                                {
+                                    <td colspan="2">
+                                        <form method="post" style="margin-right: 10px;" asp-page-handler="PayOrder">
+                                            <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
+                                            <input type="hidden" name="customerId" value="@Model.CustomerId" />
+                                            <button type="submit" class="btn btn-outline-primary">Gesamt-Bezahlen</button>
+                                        </form>
+                                    </td>                              
+                                }
+                                else
+                                {
+                                    <td colspan="2">
+                                        <form method="post" style="margin-right: 10px;" onsubmit="return confirm('Sind Sie sicher, dass Sie für Bestellung @Model.OrderNumber die Buchung zurücknehmen möchten?');" asp-page-handler="StornoPaidOrder">
+                                            <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
+                                            <input type="hidden" name="customerId" value="@Model.CustomerId" />
+                                            <button type="submit" class="btn btn-outline-danger">Gesamt-Storno</button>
+                                        </form>
+                                    </td>                                 
+                                }
+                                <td colspan="3" style="text-align: right;">Gesamtsumme</td>
                                 <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, Model.CalculatedOrder.Sum(item => item.Cost))</td>
                             </tr>
                         </tbody>
@@ -109,21 +176,23 @@
                 {
                     <form method="post" asp-page-handler="FilterOrders">
                         <div style="display: flex; justify-content: space-between;">
-                            <div>
+                            <div style="margin-right:5px">
                                 <label for="orderNumber">Bestellnummer:</label>
                                 <input type="text" id="orderNumber" name="orderNumber" />
                             </div>
-                            <div>
+                            <div style="margin-right:5px">
                                 <label for="customerFirstName">Kunden-Vorname:</label>
                                 <input type="text" id="customerFirstName" name="customerFirstName" />
                             </div>
-                            <div>
+                            <div style="margin-right:5px">
                                 <label for="customerLastName">Kunden-Nachname:</label>
                                 <input type="text" id="customerLastName" name="customerLastName" />
                             </div>
-                            <div>
-                                <button type="submit" class="btn btn-outline-primary" style="margin-left: 10px">Suchen</button>
+                            <div style="margin-right:5px">
+                                <label for="pickUpName">Pate:</label>
+                                <input type="text" id="pickUpName" name="pickUpName" />
                             </div>
+                            <button type="submit" class="btn btn-outline-primary" style="margin-left: 10px">Suchen</button>
                         </div>
                     </form>
                     <table class="table">
@@ -132,21 +201,28 @@
                                 <th>Bestellnummer</th>
                                 <th>Kunden-ID</th>
                                 <th>Kunde</th>
-                                <th style="text-align: right;">Abholer</th>
+                                <th style="text-align: right;">Pate</th>
                                 <th style="text-align: right;">Bestellkosten</th>
+                                <th style="text-align: right;">Geliefert</th>
+                                <th style="text-align: right;">Zu Liefern</th>
+                                <th style="text-align: right; border-left: 1px solid #000;">Bezahlt</th>
+                                <th style="text-align: right;">Restsumme</th>
                                 <th>Aktionen</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var order in Model.GroupedOrdersList)
                             {
-                                @if (!string.IsNullOrEmpty(order.Items.First().Booked)) { continue; }
                                 <tr>
                                     <td>@order.OrderNumber</td>
                                     <td>@order.Items.First().CustomerId</td>
                                     <td>@order.Items.First().Customer.FirstName @order.Items.First().Customer.LastName</td>
-                                    <td style ="text-align: right;">@(order.Items.First().PickUpName ?? "Selbstabholer")</td>
+                                    <td style="text-align: right;">@(order.Items.First().PickUpName ?? "Selbstabholer")</td>
                                     <td style="text-align: right;">@BasePageModel.FormatAsEuro(@order.TotalPrice)</td>
+                                    <td style="text-align: right;">@BasePageModel.FormatAsEuro(@order.TotalDelivered)</td>
+                                    <td style="text-align: right;">@BasePageModel.FormatAsEuro(@order.TotalOpen)</td>
+                                    <td style="text-align: right; border-left: 1px solid #000;">@BasePageModel.FormatAsEuro(@order.TotalPaid)</td>
+                                    <td style="text-align: right;">@BasePageModel.FormatAsEuro((@order.TotalPrice-@order.TotalPaid))</td>
                                     <td style="display: flex;">
                                         <form method="post" style="margin-right: 10px;" asp-page-handler="ToggleOrderView">
                                             <input type="hidden" name="customerId" value="@Model.CustomerId" />
@@ -157,14 +233,17 @@
                                 </tr>
                             }
                             <tr>
-                                <td colspan="4" style="text-align: right;">Gesamtsumme</td>
+                                <td colspan="4" style="text-align: right;">Gesamtsummen</td>
+                                <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, Convert.ToDecimal(Model.TotalOrdersSum))</td>
+                                <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, Convert.ToDecimal(Model.TotalBookedOrdersSum))</td>
                                 <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, Convert.ToDecimal(Model.TotalNotBookedOrdersSum))</td>
+                                <td style="text-align: right; border-left: 1px solid #000;">@BasePageModel.FormatAsEuro(null, Convert.ToDecimal(Model.TotalPaidSum))</td>
+                                <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, Convert.ToDecimal(Model.TotalOrdersSum-Model.TotalPaidSum))</td>
                                 <td></td>
                             </tr>
                         </tbody>
                     </table>
                 }
-
             </div>
         </div>
     </div>

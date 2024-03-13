@@ -11,8 +11,7 @@ namespace BrodWorschdApp.Pages
 
         public async Task OnGetAsync()
         {
-            await GetGroupedOrderList();
-            TotalNotBookedOrdersSum = CalculateTotalNotBookedSum(GroupedOrdersList);
+            await GetSums();
         }
         public async Task OnPostToggleOrderViewAsync(int customerId, string orderNumber, string isOrderViewVisible = "")
         {
@@ -38,7 +37,7 @@ namespace BrodWorschdApp.Pages
             CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
             ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
 
-            await OnGetAsync();
+            await GetSums();
         }
 
         public async Task OnPostBookOrder(int customerId, string orderNumber)
@@ -60,26 +59,78 @@ namespace BrodWorschdApp.Pages
             
             await OnGetAsync();
         }
-        public async Task UpdateInventoryAfterBooking(string orderNumber)
+
+        public async Task OnPostBookOrderItem(int productId, int customerId, string orderNumber)
         {
-            // Holen Sie sich die Details der Bestellung
-            var orderDetails = await GetOrderDetails(orderNumber);
+            CustomerId = customerId;
+            OrderNumber = orderNumber;
+            OrderStatus = "Anzeigen";
+            IsOrderViewVisible = true;
 
-            // Durchlaufen Sie jedes Produkt in der Bestellung
-            foreach (var order in orderDetails)
-            {
-                // Finden Sie das entsprechende Produkt in der ProductsTable
-                var product = await _databaseHandler.FindProductById<ProductsTable>(order.ProductId);
+            // Die Bestellung auf gebucht setzen
+            await _databaseHandler.UpdateOrderItemStatus(orderNumber, productId);
+            // Die Bestellmengen vom Lagerinhalt pro Produkt abziehen
+            await UpdateInventoryAfterBookingItem(orderNumber, productId);
 
-                // Aktualisieren Sie das Inventory des Produkts
-                if (product != null && product.Inventory != null)
-                {
-                    product.Inventory -= order.Quantity;
+            OrderDetails = await GetOrderDetails(orderNumber);
 
-                    // Speichern Sie die Änderungen in der Datenbank
-                    await _databaseHandler.UpdateDataInTable<ProductsTable>(product);
-                }
-            }
+            CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
+            ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
+
+            await OnGetAsync();
+        }
+        public async Task OnPostPayOrderItem(int productId, int customerId, string orderNumber)
+        {
+            CustomerId = customerId;
+            OrderNumber = orderNumber;
+            OrderStatus = "Anzeigen";
+            IsOrderViewVisible = true;
+
+            // Die Bestellung auf bezahlt setzen
+            await _databaseHandler.UpdateOrderItemPayStatus(orderNumber, productId);
+
+            OrderDetails = await GetOrderDetails(orderNumber);
+
+            CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
+            ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
+
+            await OnGetAsync();
+        }
+        public async Task OnPostStornoPayOrderItem(int productId, int customerId, string orderNumber)
+        {
+            CustomerId = customerId;
+            OrderNumber = orderNumber;
+            OrderStatus = "Anzeigen";
+            IsOrderViewVisible = true;
+
+            // Die Bestellung auf bezahlt setzen
+            await _databaseHandler.UpdateOrderItemPayStatus(orderNumber, productId, "");
+
+            OrderDetails = await GetOrderDetails(orderNumber);
+
+            CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
+            ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
+
+            await OnGetAsync();
+        }
+        public async Task OnPostStornoOrderItem(int productId, int customerId, string orderNumber)
+        {
+            CustomerId = customerId;
+            OrderNumber = orderNumber;
+            OrderStatus = "Anzeigen";
+            IsOrderViewVisible = true;
+
+            // Die Bestellung auf storniert setzen
+            await _databaseHandler.UpdateOrderItemStatus(orderNumber, productId, "");
+            // Die Bestellmengen zum Lagerinhalt pro Produkt hinzufügen
+            await UpdateInventoryAfterStornoItem(orderNumber, productId);
+
+            OrderDetails = await GetOrderDetails(orderNumber);
+
+            CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
+            ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
+
+            await OnGetAsync();
         }
 
         public async Task OnPostStornoOrder(int customerId, string orderNumber)
@@ -100,26 +151,42 @@ namespace BrodWorschdApp.Pages
 
             await OnGetAsync();
         }
-        public async Task UpdateInventoryAfterCancellation(string orderNumber)
+        public async Task OnPostPayOrder(int customerId, string orderNumber)
         {
-            // Holen Sie sich die Details der stornierten Bestellung
-            var orderDetails = await GetOrderDetails(orderNumber);
+            CustomerId = customerId;
+            OrderNumber = orderNumber;
+            OrderStatus = "Anzeigen";
+            IsOrderViewVisible = true;
 
-            // Durchlaufen Sie jedes Produkt in der stornierten Bestellung
-            foreach (var order in orderDetails)
-            {
-                // Finden Sie das entsprechende Produkt in der ProductsTable
-                var product = await _databaseHandler.FindProductById<ProductsTable>(order.ProductId);
+            // Die Bestellung auf gebucht setzen
+            await _databaseHandler.UpdateDataInTable<CustomerOrdersTable>(o => o.OrderNumber == orderNumber, entity => entity.Paid = "paid");
+            // Die Bestellmengen vom Lagerinhalt pro Produkt abziehen
+            await UpdateInventoryAfterBooking(orderNumber);
 
-                // Aktualisieren Sie das Inventory des Produkts
-                if (product != null && product.Inventory != null)
-                {
-                    product.Inventory += order.Quantity;
+            OrderDetails = await GetOrderDetails(orderNumber);
 
-                    // Speichern Sie die Änderungen in der Datenbank
-                    await _databaseHandler.UpdateDataInTable<ProductsTable>(product);
-                }
-            }
+            CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
+            ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
+
+            await OnGetAsync();
+        }
+        public async Task OnPostStornoPaidOrder(int customerId, string orderNumber)
+        {
+            CustomerId = customerId;
+            OrderNumber = orderNumber;
+            OrderStatus = "Anzeigen";
+            IsOrderViewVisible = true;
+            // Die Bestellung auf ungebucht setzen
+            await _databaseHandler.UpdateDataInTable<CustomerOrdersTable>(o => o.OrderNumber == orderNumber, entity => entity.Paid = string.Empty);
+            // Die Bestellmengen zum Lagerinhalt pro Produkt hinzuzählen
+            await UpdateInventoryAfterCancellation(orderNumber);
+
+            OrderDetails = await GetOrderDetails(orderNumber);
+
+            CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
+            ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
+
+            await OnGetAsync();
         }
     }
 }
