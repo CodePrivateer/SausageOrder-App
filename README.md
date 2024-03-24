@@ -12,6 +12,9 @@ This is a simple web application designed for managing products and customers. I
 ## Prerequisites
 This is an ASP.NET Core application and requires the .NET runtime. You can download it from the official .NET website.
 
+### Configuring the Database
+This application uses SQLite for data storage. The connection string for the database is located in the `DataBaseService.cs`. You need to adjust this connection string to match your environment settings. If the connection string is not correctly set, the application may not find the SQLite database.
+
 ## Built With
 * .NET 8.0
 
