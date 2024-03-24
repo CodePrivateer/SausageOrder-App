@@ -1,4 +1,4 @@
-# BratWurst-App / Sausage App
+# Sausage Order App / BratWurst-App
 
 ## Overview
 This is a simple web application designed for managing products and customers. It allows each customer to place multiple orders, and these orders can be partially or fully paid and picked up. 
