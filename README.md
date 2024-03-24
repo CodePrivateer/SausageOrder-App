@@ -1,7 +1,7 @@
 # Sausage Order App / BratWurst-App
 
 ## Overview
-This is a simple web application designed for managing products and customers. It allows each customer to place multiple orders, and these orders can be partially or fully paid and picked up. 
+This is a simple web application designed for managing products and customers. It allows each customer to place multiple orders, and these orders can be partially or fully paid and picked up. The project runs on a Raspberry Pi and operates without an internet connection.
 
 ## Features
 - **Product Management**: Allows creation and management of products.
