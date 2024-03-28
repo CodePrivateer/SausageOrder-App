@@ -47,16 +47,20 @@ namespace BrodWorschdApp.Pages
             OrderStatus = "Anzeigen";
             IsOrderViewVisible = true;
 
+            // Erstellen Sie eine Liste der Produkte, die noch nicht gebucht sind
+            var unbookedProducts = await _databaseHandler.GetDataFromTable<CustomerOrdersTable>(o => o.OrderNumber == orderNumber && o.Booked != "booked");
+
             // Die Bestellung auf gebucht setzen
             await _databaseHandler.UpdateDataInTable<CustomerOrdersTable>(o => o.OrderNumber == orderNumber, entity => entity.Booked = "booked");
+
             // Die Bestellmengen vom Lagerinhalt pro Produkt abziehen
-            await UpdateInventoryAfterBooking(orderNumber);
+            await UpdateInventoryAfterBooking(unbookedProducts);
 
             OrderDetails = await GetOrderDetails(orderNumber);
 
             CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
             ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
-            
+
             await OnGetAsync();
         }
 
@@ -160,8 +164,6 @@ namespace BrodWorschdApp.Pages
 
             // Die Bestellung auf gebucht setzen
             await _databaseHandler.UpdateDataInTable<CustomerOrdersTable>(o => o.OrderNumber == orderNumber, entity => entity.Paid = "paid");
-            // Die Bestellmengen vom Lagerinhalt pro Produkt abziehen
-            await UpdateInventoryAfterBooking(orderNumber);
 
             OrderDetails = await GetOrderDetails(orderNumber);
 
@@ -178,8 +180,6 @@ namespace BrodWorschdApp.Pages
             IsOrderViewVisible = true;
             // Die Bestellung auf ungebucht setzen
             await _databaseHandler.UpdateDataInTable<CustomerOrdersTable>(o => o.OrderNumber == orderNumber, entity => entity.Paid = string.Empty);
-            // Die Bestellmengen zum Lagerinhalt pro Produkt hinzuzählen
-            await UpdateInventoryAfterCancellation(orderNumber);
 
             OrderDetails = await GetOrderDetails(orderNumber);
 

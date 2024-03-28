@@ -60,21 +60,6 @@ namespace BrodWorschdApp.Pages
             }
         }
 
-        //public List<GroupedOrder> CalculateGroupedOrders(List<CustomerOrdersTable> orders, List<ProductsTable> products)
-        //{
-        //    return orders
-        //        .GroupBy(order => order.OrderNumber)
-        //        .Select(group => new GroupedOrder
-        //        {
-        //            OrderNumber = group.Key,
-        //            Items = group.ToList(),
-        //            TotalPrice = (float)group.Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductId)?.Price ?? 0)),
-        //            TotalDelivered = (float)group.Where(item => item.Booked?.ToLower() == "booked").Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductId)?.Price ?? 0)),
-        //            TotalOpen = (float)group.Where(item => item.Booked?.ToLower() == "").Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductId)?.Price ?? 0)),
-        //            TotalPaid = (float)group.Where(item => item.Paid?.ToLower() == "paid").Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductId)?.Price ?? 0))
-        //        })
-        //        .ToList();
-        //}
         public List<GroupedOrder> CalculateGroupedOrders(List<CustomerOrdersTable> orders, List<ProductsTable> products)
         {
             return orders
@@ -244,19 +229,17 @@ namespace BrodWorschdApp.Pages
                 await _databaseHandler.UpdateDataInTable<ProductsTable>(product);
             }
         }
-        public async Task UpdateInventoryAfterBooking(string orderNumber) // Ganze Bestellung
-        {
-            // Holen Sie sich die Details der Bestellung
-            var orderDetails = await GetOrderDetails(orderNumber);
 
+        public async Task UpdateInventoryAfterBooking(List<CustomerOrdersTable> unbookedProducts) // Ganze Bestellung
+        {
             // Durchlaufen Sie jedes Produkt in der Bestellung
-            foreach (var order in orderDetails)
+            foreach (var order in unbookedProducts)
             {
                 // Finden Sie das entsprechende Produkt in der ProductsTable
                 var product = await _databaseHandler.FindProductById<ProductsTable>(order.ProductId);
 
                 // Aktualisieren Sie das Inventory des Produkts
-                if (product != null && product.Inventory != null && order.Booked == "booked")
+                if (product != null && product.Inventory != null)
                 {
                     product.Inventory -= order.Quantity;
 
@@ -265,6 +248,7 @@ namespace BrodWorschdApp.Pages
                 }
             }
         }
+
         public async Task UpdateInventoryAfterCancellation(string orderNumber) // Ganze Bestellung
         {
             // Holen Sie sich die Details der stornierten Bestellung
