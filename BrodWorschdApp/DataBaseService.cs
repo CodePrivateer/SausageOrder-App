@@ -157,7 +157,8 @@
             }
             else
             {
-                connectionString = "Data Source=/home/admin/brodworschdapp/SqliteDB/brodworschdapp_db.db";
+                //connectionString = "Data Source=/home/admin/brodworschdapp/SqliteDB/brodworschdapp_db.db";
+                connectionString = "Data Source=/home/aspnetcore/brodworschdapp/SqliteDB/brodworschdapp_db.db";
             }
 
             optionsBuilder.UseSqlite(connectionString);
