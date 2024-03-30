@@ -1,25 +1,35 @@
 using BrodWorschdApp;
 using BrodWorschdApp.Pages;
+using Microsoft.AspNetCore.Mvc;
 
 public class CustomerModel : BasePageModel
 {
     public bool IsNewCustomerFormVisible { get; set; }
     public bool IsEditCustomerFormVisible { get; set; }
 
-    public CustomerModel(DatabaseHandler databaseHandler, ILogger<CustomerModel> logger) : base(databaseHandler, logger)
+    public CustomerModel(DatabaseHandler databaseHandler, ILogger<CustomerModel> logger, LanguageService languageService) :
+            base(databaseHandler, logger, languageService)
     {
     }
 
-    public async Task OnGetAsync()
+    public async Task<IActionResult> OnGetAsync(string culture)
     {
         // Hier können Sie die Kundenliste aus der Datenbank abrufen
         CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>();
+
+        // Setup of the Language
+        if (!string.IsNullOrEmpty(culture))
+        {
+            _languageservice.SetCulture(culture);
+            return RedirectToPage();
+        }
+        return Page();
     }
     public async Task OnPostCancelCustomer()
     {
         IsEditCustomerFormVisible=false;
         IsNewCustomerFormVisible =false;
-        await OnGetAsync();
+        await OnGetAsync(Culture);
     }
     public async Task OnPostAddCustomerAsync(string firstName, string lastName)
     {
@@ -34,7 +44,7 @@ public class CustomerModel : BasePageModel
             ErrorMessage = "Kein Kunde hinzugefügt! Es fehlten Angaben, bei mindestens einem Feld wurde nichts eingetragen!";
         }
         // neu laden der Kundendaten
-        await OnGetAsync();
+        await OnGetAsync(Culture);
     }
     public async Task OnPostToggleEditCustomerFormAsync(int customerId)
     {
@@ -59,12 +69,12 @@ public class CustomerModel : BasePageModel
             ErrorMessage = "Kunde nicht geändert! Es fehlten Angaben, bei mindestens einem Feld wurde nichts eingetragen!";
         }
         // neu laden der Kundendaten
-        await OnGetAsync();
+        await OnGetAsync(Culture);
     }
     public async Task OnPostDeleteCustomerAsync(int customerId)
     {
         await _databaseHandler.DeleteDataFromTable<CustomersTable>(customerId);
-        await OnGetAsync();
+        await OnGetAsync(Culture);
     }
 
     public void OnPostToggleNewCustomerForm()

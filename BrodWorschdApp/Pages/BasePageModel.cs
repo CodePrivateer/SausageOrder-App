@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Localization;
 
 namespace BrodWorschdApp.Pages
 {
@@ -24,7 +27,12 @@ namespace BrodWorschdApp.Pages
         public float TotalNotBookedOrdersSum { get; set; }
         public float TotalPaidSum { get; set; }
 
-        public BasePageModel(DatabaseHandler databaseHandler, ILogger<BasePageModel> logger)
+        // languageService
+        public readonly LanguageService _languageservice;
+        public Dictionary<string, string> CultureStrings { get; set; }
+        public string Culture { get; set; }
+
+        public BasePageModel(DatabaseHandler databaseHandler, ILogger<BasePageModel> logger, LanguageService languageService)
         {
             _databaseHandler = databaseHandler;
             _logger = logger;
@@ -40,6 +48,11 @@ namespace BrodWorschdApp.Pages
             OrderStatus = string.Empty;
             UserName = string.Empty;
             PickUpName = string.Empty;
+
+            //Language Service
+            _languageservice = languageService;
+            CultureStrings = _languageservice.GetAllStrings();
+            Culture = "";
         }
 
         public static string FormatAsEuro(float? valueFloat = null, decimal? valueDecimal = null)

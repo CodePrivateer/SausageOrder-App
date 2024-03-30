@@ -153,7 +153,7 @@
             {
                 // Verwenden Sie den relativen Pfad zur SQLite-Datei in Ihrem Projektordner
                 // connectionString = $"Data Source={Path.Combine(Directory.GetCurrentDirectory(), "BrodWorschdApp", "SqliteDB", "brodworschdapp_db.db")}";
-                connectionString = "Data Source=C:\\Users\\ofran\\OneDrive\\Dokumente\\Visual Studio 2022\\repos\\BrodWorschdApp\\BrodWorschdApp\\SqliteDB\\brodworschdapp_db.db";
+                connectionString = "Data Source=S:\\brodworschdapp\\SqliteDB\\brodworschdapp_db.db";
             }
             else
             {

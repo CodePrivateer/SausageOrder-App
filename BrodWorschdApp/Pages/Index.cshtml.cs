@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Mvc;
+
 namespace BrodWorschdApp.Pages
 {
     public class IndexModel : BasePageModel
@@ -5,14 +7,24 @@ namespace BrodWorschdApp.Pages
 
         public bool IsOrderViewVisible { get; set; }
 
-        public IndexModel(DatabaseHandler databaseHandler, ILogger<IndexModel> logger) : base(databaseHandler, logger)
+        public IndexModel(DatabaseHandler databaseHandler, ILogger<IndexModel> logger, LanguageService languageService) : 
+            base(databaseHandler, logger, languageService)
         {
         }
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync(string culture)
         {
             await GetSums();
+
+            // Setup of the Language
+            if (!string.IsNullOrEmpty(culture))
+            {
+                _languageservice.SetCulture(culture);
+                return RedirectToPage();
+            }
+            return Page();
         }
+
         public async Task OnPostToggleOrderViewAsync(int customerId, string orderNumber, string isOrderViewVisible = "")
         {
             if (isOrderViewVisible == "True")
@@ -113,7 +125,7 @@ namespace BrodWorschdApp.Pages
             CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
             ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
 
-            await OnGetAsync();
+            await OnGetAsync(Culture);
         }
     }
 }

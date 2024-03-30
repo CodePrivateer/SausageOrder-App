@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
+
 namespace BrodWorschdApp.Pages
 
 {
@@ -6,7 +9,8 @@ namespace BrodWorschdApp.Pages
         public bool IsEditOrderFormVisible { get; set; }
         public bool IsNewOrderFormVisible { get; set; }
 
-        public CustomerOrdersModel(DatabaseHandler databaseHandler, ILogger<CustomerOrdersModel> logger) : base(databaseHandler, logger)
+        public CustomerOrdersModel(DatabaseHandler databaseHandler, ILogger<CustomerOrdersModel> logger, LanguageService languageService) :
+            base(databaseHandler, logger, languageService)
         {
         }
         public async Task OnPostToggleEditOrderForm(int customerId, string orderNumber)
@@ -26,7 +30,7 @@ namespace BrodWorschdApp.Pages
             ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>();
         }
 
-        public async Task OnGetAsync(int customerId)
+        public async Task<IActionResult> OnGetAsync(int customerId, string culture)
         {
             CustomerId = customerId;
             OrderStatus = "";
@@ -35,6 +39,14 @@ namespace BrodWorschdApp.Pages
             var products = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
             GroupedOrdersList = CalculateGroupedOrders(orders, products);
             CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
+
+            // Setup of the Language
+            if (!string.IsNullOrEmpty(culture))
+            {
+                _languageservice.SetCulture(culture);
+                return RedirectToPage();
+            }
+            return Page();
         }
 
         public async Task OnPostCancelAction(int customerId)
@@ -42,7 +54,7 @@ namespace BrodWorschdApp.Pages
             CustomerId= customerId;
             IsEditOrderFormVisible = false;
             IsNewOrderFormVisible = false;
-            await OnGetAsync(customerId);
+            await OnGetAsync(customerId, Culture);
         }
 
         public async Task OnPostToggleNewOrderForm(int customerId)
@@ -140,7 +152,7 @@ namespace BrodWorschdApp.Pages
                     await _databaseHandler.AddDataToTable(order);
                 }
             }
-            await OnGetAsync(customerId);
+            await OnGetAsync(customerId, Culture);
         }
         public async Task OnPostCalculateCosts(int customerId, Dictionary<int, int> orderQuantity, string? orderNumber = null)
         {
@@ -172,7 +184,7 @@ namespace BrodWorschdApp.Pages
                 // Löschen Sie die Bestellung aus der Datenbank
                 await _databaseHandler.DeleteDataFromTable<CustomerOrdersTable>(order.ID);
             }
-            await OnGetAsync(customerId);
+            await OnGetAsync(customerId, Culture);
         }
     }
 }

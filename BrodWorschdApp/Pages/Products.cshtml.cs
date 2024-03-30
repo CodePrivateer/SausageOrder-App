@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BrodWorschdApp.Pages
 {
@@ -8,14 +7,23 @@ namespace BrodWorschdApp.Pages
         public bool IsNewProductFormVisible { get; set; }
         public bool IsEditProductFormVisible { get; set; }
 
-        public ProductsModel(DatabaseHandler databaseHandler, ILogger<ProductsModel> logger) : base(databaseHandler, logger)
+        public ProductsModel(DatabaseHandler databaseHandler, ILogger<ProductsModel> logger, LanguageService languageService) :
+            base(databaseHandler, logger, languageService)
         {
         }
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync(string culture)
         {
             ProductList = await _databaseHandler.GetDataFromTable<ProductsTable>();
             OrderedQuantitiesPerProduct = await _databaseHandler.GetOrderedQuantitiesPerProduct();
+
+            // Setup of the Language
+            if (!string.IsNullOrEmpty(culture))
+            {
+                _languageservice.SetCulture(culture);
+                return RedirectToPage();
+            }
+            return Page();
         }
         public void OnPostToggleNewProductForm()
         {
@@ -46,12 +54,12 @@ namespace BrodWorschdApp.Pages
                 ErrorMessage = "Kein Produkt hinzugefügt! Es fehlten Angaben, bei mindestens einem Feld wurde nichts eingetragen!";
             }
             // neu laden der Kundendaten
-            await OnGetAsync();
+            await OnGetAsync(Culture);
         }
         public async Task OnPostDeleteProductAsync(int productId)
         {
             await _databaseHandler.DeleteDataFromTable<ProductsTable>(productId);
-            await OnGetAsync();
+            await OnGetAsync(Culture);
         }
         public async Task OnPostEditProductAsync(string productName, float productPrice, int productInventory, float productSize, string productSizeUnit, int productId)
         {
@@ -74,11 +82,11 @@ namespace BrodWorschdApp.Pages
                 ErrorMessage = "Kein Produkt hinzugefügt! Es fehlten Angaben, bei mindestens einem Feld wurde nichts eingetragen!";
             }
             // neu laden der Kundendaten
-            await OnGetAsync();
+            await OnGetAsync(Culture);
         }
         public async Task OnPostCancelEditProductAsync()
         {
-            await OnGetAsync();
+            await OnGetAsync(Culture);
         }
     }
 }
