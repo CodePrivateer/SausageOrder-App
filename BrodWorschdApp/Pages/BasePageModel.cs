@@ -172,7 +172,7 @@ namespace BrodWorschdApp.Pages
         }
         public async Task GetSums(bool refreshData = true)
         {
-            if(refreshData) 
+            if (refreshData)
             {
                 await GetGroupedOrderList();
             }
@@ -188,48 +188,34 @@ namespace BrodWorschdApp.Pages
             var products = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
             GroupedOrdersList = CalculateGroupedOrders(orders, products);
         }
-
-        public async Task UpdateInventoryAfterStornoItem(string orderNumber, int productId) // Einzelne Position der Bestellung
+        public async Task UpdateInventory(string orderNumber, int productId, bool isBooked)
         {
-            // Holen Sie sich die Details der Bestellung
+            // Get the order details
             var orderDetails = await GetOrderDetails(orderNumber);
 
-            // Finden Sie das entsprechende Produkt in der ProductsTable
+            // Find the corresponding product in the ProductsTable
             var product = await _databaseHandler.FindProductById<ProductsTable>(productId);
 
-            // Finden Sie die Bestellung mit der gegebenen productId
+            // Find the order with the given productId
             var order = orderDetails.FirstOrDefault(o => o.ProductId == productId);
 
-            // Aktualisieren Sie das Inventory des Produkts
-            if (product != null && product.Inventory != null && order != null && order.Booked == "")
+            if (product != null && order != null)
             {
-                product.Inventory += order.Quantity; // Addiere die stornierte Menge wieder zum Inventar hinzu
+                if (isBooked)
+                {
+                    // Decrease the inventory if the order is being booked
+                    product.Inventory -= order.Quantity;
+                }
+                else
+                {
+                    // Increase the inventory if the order is being storned
+                    product.Inventory += order.Quantity;
+                }
 
-                // Speichern Sie die Änderungen in der Datenbank
+                // Save the changes to the database
                 await _databaseHandler.UpdateDataInTable<ProductsTable>(product);
             }
         }
-        public async Task UpdateInventoryAfterBookingItem(string orderNumber, int productId) // Einzelne Position der Bestellung
-        {
-            // Holen Sie sich die Details der Bestellung
-            var orderDetails = await GetOrderDetails(orderNumber);
-
-            // Finden Sie das entsprechende Produkt in der ProductsTable
-            var product = await _databaseHandler.FindProductById<ProductsTable>(productId);
-
-            // Finden Sie die Bestellung mit der gegebenen productId
-            var order = orderDetails.FirstOrDefault(o => o.ProductId == productId);
-
-            // Aktualisieren Sie das Inventory des Produkts
-            if (product != null && product.Inventory != null && order != null && order.Booked == "booked")
-            {
-                product.Inventory -= order.Quantity; // Addiere die stornierte Menge wieder zum Inventar hinzu
-
-                // Speichern Sie die Änderungen in der Datenbank
-                await _databaseHandler.UpdateDataInTable<ProductsTable>(product);
-            }
-        }
-
         public async Task UpdateInventoryAfterBooking(List<CustomerOrdersTable> unbookedProducts) // Ganze Bestellung
         {
             // Durchlaufen Sie jedes Produkt in der Bestellung

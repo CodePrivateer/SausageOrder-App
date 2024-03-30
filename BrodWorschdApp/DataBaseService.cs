@@ -166,6 +166,10 @@
     }
     public class CustomersTable
     {
+        public CustomersTable()
+        {
+            Orders = new List<CustomerOrdersTable>();
+        }
         public int ID { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
@@ -174,15 +178,19 @@
 
     public class CustomerOrdersTable
     {
+        public CustomerOrdersTable()
+        {
+            Customer = new CustomersTable();
+        }
         public int ID { get; set; }
-        public string OrderNumber { get; set; }
+        public string OrderNumber { get; set; } = string.Empty;
         public int CustomerId { get; set; }
         public int ProductId { get; set; }
         public int Quantity { get; set; }
-        public string Date { get; set; }
-        public string UserName { get; set; }
+        public string Date { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
         public string? PickUpName { get; set; }
-        public string? Booked {  get; set; }
+        public string? Booked { get; set; }
         public string? Paid { get; set; }
         public virtual CustomersTable Customer { get; set; }
         // Sie können hier weitere Eigenschaften hinzufügen, die eine Bestellung haben könnte
@@ -216,5 +224,4 @@
             TotalPrice = 0;
         }
     }
-
 }

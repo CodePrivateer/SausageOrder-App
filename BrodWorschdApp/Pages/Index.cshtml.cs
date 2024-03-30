@@ -74,7 +74,7 @@ namespace BrodWorschdApp.Pages
             // Die Bestellung auf gebucht setzen
             await _databaseHandler.UpdateOrderItemStatus(orderNumber, productId);
             // Die Bestellmengen vom Lagerinhalt pro Produkt abziehen
-            await UpdateInventoryAfterBookingItem(orderNumber, productId);
+            await UpdateInventory(orderNumber, productId, true);
 
             OrderDetails = await GetOrderDetails(orderNumber);
 
@@ -126,8 +126,8 @@ namespace BrodWorschdApp.Pages
 
             // Die Bestellung auf storniert setzen
             await _databaseHandler.UpdateOrderItemStatus(orderNumber, productId, "");
-            // Die Bestellmengen zum Lagerinhalt pro Produkt hinzufügen
-            await UpdateInventoryAfterStornoItem(orderNumber, productId);
+            // Die Bestellmengen zum Lagerinhalt pro Produkt hinzufï¿½gen
+            await UpdateInventory(orderNumber, productId, false);
 
             OrderDetails = await GetOrderDetails(orderNumber);
 
@@ -145,7 +145,7 @@ namespace BrodWorschdApp.Pages
             IsOrderViewVisible = true;
             // Die Bestellung auf ungebucht setzen
             await _databaseHandler.UpdateDataInTable<CustomerOrdersTable>(o => o.OrderNumber == orderNumber, entity => entity.Booked = string.Empty);
-            // Die Bestellmengen zum Lagerinhalt pro Produkt hinzuzählen
+            // Die Bestellmengen zum Lagerinhalt pro Produkt hinzuzï¿½hlen
             await UpdateInventoryAfterCancellation(orderNumber);
 
             OrderDetails = await GetOrderDetails(orderNumber);
