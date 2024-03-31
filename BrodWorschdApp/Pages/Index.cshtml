@@ -1,10 +1,10 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = @Model.CultureStrings["Orders"];
 }
 
-<h2>Bestellungen</h2>
+<h2>@Model.CultureStrings["Orders"]</h2>
 <div class="container">
     <div class="content">
         <div class="products-list">
@@ -15,18 +15,18 @@
                         <input type="hidden" name="isOrderViewVisible" value="@Model.IsOrderViewVisible" />
                         <input type="hidden" name="customerId" value="@Model.CustomerId" />
                         <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
-                        <button type="submit" class="btn btn-outline-primary">Zurück zur Übersicht</button>
+                        <button type="submit" class="btn btn-outline-primary">@Model.CultureStrings["BackToOverView"]</button>
                     </form>
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Kunden ID</th>
-                                <th>Vorname</th>
-                                <th>Nachname</th>
-                                <th>Pate</th>
+                                <th>@Model.CultureStrings["Customer"] ID</th>
+                                <th>@Model.CultureStrings["FirstName"]</th>
+                                <th>@Model.CultureStrings["LastName"]</th>
+                                <th>@Model.CultureStrings["Collector"]</th>
                                 @if (Model.OrderNumber != string.Empty)
                                 {
-                                    <th>Bestellnummer</th>
+                                    <th>@Model.CultureStrings["OrderNumber"]</th>
                                 }
                             </tr>
                         </thead>
@@ -37,7 +37,7 @@
                                     <td>@customer.ID</td>
                                     <td>@customer.FirstName</td>
                                     <td>@customer.LastName</td>
-                                    <td>@(Model.OrderDetails.First().PickUpName ?? "Selbstabholer")</td>
+                                    <td>@(Model.OrderDetails.First().PickUpName ?? @Model.CultureStrings["SelfCollector"])</td>
                                     @if (Model.OrderNumber != string.Empty)
                                     {
                                         <td>@Model.OrderNumber</td>
@@ -51,14 +51,14 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Produkt</th>
-                                <th>Preis</th>
-                                <th>Größe</th>
-                                <th>Einheit</th>
-                                <th>Bestellmenge</th>
-                                <th>Kosten</th>
-                                <th>Liefern</th>
-                                <th>Zahlen</th>
+                                <th>@Model.CultureStrings["Product"]</th>
+                                <th>@Model.CultureStrings["Price"]</th>
+                                <th>@Model.CultureStrings["Size"]</th>
+                                <th>@Model.CultureStrings["Unit"]</th>
+                                <th>@Model.CultureStrings["OrderQuantity"]</th>
+                                <th>@Model.CultureStrings["Cost"]</th>
+                                <th>@Model.CultureStrings["Deliver"]</th>
+                                <th>@Model.CultureStrings["Pay"]</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -82,7 +82,7 @@
                                                     <input type="hidden" name="productId" value="@product.ID" />
                                                     <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
                                                     <input type="hidden" name="customerId" value="@Model.CustomerId" />
-                                                    <button type="submit" class="btn btn-outline-primary">Teil-Liefern</button>
+                                                    <button type="submit" class="btn btn-outline-primary">@Model.CultureStrings["PartDeliver"]</button>
                                                 </form>
                                             </td>
                                         }
@@ -93,7 +93,7 @@
                                                     <input type="hidden" name="productId" value="@product.ID" />
                                                     <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
                                                     <input type="hidden" name="customerId" value="@Model.CustomerId" />
-                                                    <button type="submit" class="btn btn-outline-danger">Teil-Rückliefern</button>
+                                                    <button type="submit" class="btn btn-outline-danger">@Model.CultureStrings["PartialReturn"]</button>
                                                 </form>
                                             </td>
                                         }
@@ -104,7 +104,7 @@
                                                     <input type="hidden" name="productId" value="@product.ID" />
                                                     <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
                                                     <input type="hidden" name="customerId" value="@Model.CustomerId" />
-                                                    <button type="submit" class="btn btn-outline-primary">Teil-Bezahlen</button>
+                                                    <button type="submit" class="btn btn-outline-primary">@Model.CultureStrings["PayInPart"]</button>
                                                 </form>
                                             </td>
                                         }
@@ -115,7 +115,7 @@
                                                     <input type="hidden" name="productId" value="@product.ID" />
                                                     <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
                                                     <input type="hidden" name="customerId" value="@Model.CustomerId" />
-                                                    <button type="submit" class="btn btn-outline-danger">Teil-Storno</button>
+                                                    <button type="submit" class="btn btn-outline-danger">@Model.CultureStrings["PartialCancellation"]</button>
                                                 </form>
                                             </td>
                                         }
@@ -132,7 +132,7 @@
                                         <form method="post" style="margin-right: 10px;" asp-page-handler="BookOrder">
                                             <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
                                             <input type="hidden" name="customerId" value="@Model.CustomerId" />
-                                            <button type="submit" class="btn btn-outline-primary">Gesamt-Liefern</button>
+                                            <button type="submit" class="btn btn-outline-primary">@Model.CultureStrings["TotalDeliver"]</button>
                                         </form>
                                     </td>
                                 }
@@ -142,7 +142,7 @@
                                         <form method="post" style="margin-right: 10px;" onsubmit="return confirm('Sind Sie sicher, dass Sie für Bestellung @Model.OrderNumber die Buchung zurücknehmen möchten?');" asp-page-handler="StornoOrder">
                                             <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
                                             <input type="hidden" name="customerId" value="@Model.CustomerId" />
-                                            <button type="submit" class="btn btn-outline-danger">Gesamt-Rückliefern</button>
+                                            <button type="submit" class="btn btn-outline-danger">@Model.CultureStrings["TotalReturns"]</button>
                                         </form>
                                     </td>
                                 }
@@ -152,7 +152,7 @@
                                         <form method="post" style="margin-right: 10px;" asp-page-handler="PayOrder">
                                             <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
                                             <input type="hidden" name="customerId" value="@Model.CustomerId" />
-                                            <button type="submit" class="btn btn-outline-primary">Gesamt-Bezahlen</button>
+                                            <button type="submit" class="btn btn-outline-primary">@Model.CultureStrings["PayInFull"]</button>
                                         </form>
                                     </td>                              
                                 }
@@ -162,11 +162,11 @@
                                         <form method="post" style="margin-right: 10px;" onsubmit="return confirm('Sind Sie sicher, dass Sie für Bestellung @Model.OrderNumber die Buchung zurücknehmen möchten?');" asp-page-handler="StornoPaidOrder">
                                             <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
                                             <input type="hidden" name="customerId" value="@Model.CustomerId" />
-                                            <button type="submit" class="btn btn-outline-danger">Gesamt-Storno</button>
+                                            <button type="submit" class="btn btn-outline-danger">@Model.CultureStrings["TotalCancellation"]</button>
                                         </form>
                                     </td>                                 
                                 }
-                                <td colspan="3" style="text-align: right;">Gesamtsumme</td>
+                                <td colspan="3" style="text-align: right;">@Model.CultureStrings["Total"]</td>
                                 <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, Model.CalculatedOrder.Sum(item => item.Cost))</td>
                             </tr>
                         </tbody>
@@ -177,37 +177,37 @@
                     <form method="post" asp-page-handler="FilterOrders">
                         <div style="display: flex; justify-content: space-between;">
                             <div style="margin-right:5px">
-                                <label for="orderNumber">Bestellnummer:</label>
+                                <label for="orderNumber">@Model.CultureStrings["OrderNumber"]:</label>
                                 <input type="text" id="orderNumber" name="orderNumber" />
                             </div>
                             <div style="margin-right:5px">
-                                <label for="customerFirstName">Kunden-Vorname:</label>
+                                <label for="customerFirstName">@Model.CultureStrings["CustomerFirstName"]:</label>
                                 <input type="text" id="customerFirstName" name="customerFirstName" />
                             </div>
                             <div style="margin-right:5px">
-                                <label for="customerLastName">Kunden-Nachname:</label>
+                                <label for="customerLastName">@Model.CultureStrings["CustomerLastName"]:</label>
                                 <input type="text" id="customerLastName" name="customerLastName" />
                             </div>
                             <div style="margin-right:5px">
-                                <label for="pickUpName">Pate:</label>
+                                <label for="pickUpName">@Model.CultureStrings["Collector"]:</label>
                                 <input type="text" id="pickUpName" name="pickUpName" />
                             </div>
-                            <button type="submit" class="btn btn-outline-primary" style="margin-left: 10px">Suchen</button>
+                            <button type="submit" class="btn btn-outline-primary" style="margin-left: 10px">@Model.CultureStrings["Search"]</button>
                         </div>
                     </form>
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Bestellnummer</th>
-                                <th>Kunden-ID</th>
-                                <th>Kunde</th>
-                                <th style="text-align: right;">Pate</th>
-                                <th style="text-align: right;">Bestellkosten</th>
-                                <th style="text-align: right;">Geliefert</th>
-                                <th style="text-align: right;">Zu Liefern</th>
-                                <th style="text-align: right; border-left: 1px solid #000;">Bezahlt</th>
-                                <th style="text-align: right;">Restsumme</th>
-                                <th>Aktionen</th>
+                                <th>@Model.CultureStrings["OrderNumber"]</th>
+                                <th>@Model.CultureStrings["CustomerId"]</th>
+                                <th>@Model.CultureStrings["Customer"]</th>
+                                <th style="text-align: right;">@Model.CultureStrings["Collector"]</th>
+                                <th style="text-align: right;">@Model.CultureStrings["OrderCost"]</th>
+                                <th style="text-align: right;">@Model.CultureStrings["Delivered"]</th>
+                                <th style="text-align: right;">@Model.CultureStrings["ToDeliver"]</th>
+                                <th style="text-align: right; border-left: 1px solid #000;">@Model.CultureStrings["Paid"]</th>
+                                <th style="text-align: right;">@Model.CultureStrings["RemainingAmount"]</th>
+                                <th>@Model.CultureStrings["Actions"]</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -217,7 +217,7 @@
                                     <td>@order.OrderNumber</td>
                                     <td>@order.Items.First().CustomerId</td>
                                     <td>@order.Items.First().Customer.FirstName @order.Items.First().Customer.LastName</td>
-                                    <td style="text-align: right;">@(order.Items.First().PickUpName ?? "Selbstabholer")</td>
+                                    <td style="text-align: right;">@(order.Items.First().PickUpName ?? @Model.CultureStrings["SelfCollector"])</td>
                                     <td style="text-align: right;">@BasePageModel.FormatAsEuro(@order.TotalPrice)</td>
                                     <td style="text-align: right;">@BasePageModel.FormatAsEuro(@order.TotalDelivered)</td>
                                     <td style="text-align: right;">@BasePageModel.FormatAsEuro(@order.TotalOpen)</td>
@@ -227,13 +227,13 @@
                                         <form method="post" style="margin-right: 10px;" asp-page-handler="ToggleOrderView">
                                             <input type="hidden" name="customerId" value="@Model.CustomerId" />
                                             <input type="hidden" name="orderNumber" value="@order.OrderNumber" />
-                                            <button type="submit" class="btn btn-outline-primary">Anzeigen</button>
+                                            <button type="submit" class="btn btn-outline-primary">@Model.CultureStrings["Show"]</button>
                                         </form>
                                     </td>
                                 </tr>
                             }
                             <tr>
-                                <td colspan="4" style="text-align: right;">Gesamtsummen</td>
+                                <td colspan="4" style="text-align: right;">@Model.CultureStrings["Total"]</td>
                                 <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, Convert.ToDecimal(Model.TotalOrdersSum))</td>
                                 <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, Convert.ToDecimal(Model.TotalBookedOrdersSum))</td>
                                 <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, Convert.ToDecimal(Model.TotalNotBookedOrdersSum))</td>

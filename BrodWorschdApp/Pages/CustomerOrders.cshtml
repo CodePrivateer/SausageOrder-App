@@ -24,18 +24,18 @@
             <div class="actions">
                 <form method="post">
                     <input type="hidden" name="customerId" value="@Model.CustomerId" />
-                    <button type="submit" class="btn btn-outline-primary" asp-page-handler="ToggleNewOrderForm">Neue Bestellung</button>
+                    <button type="submit" class="btn btn-outline-primary" asp-page-handler="ToggleNewOrderForm">@Model.CultureStrings["NewOrder"]</button>
                 </form>
             </div>
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Kunden ID</th>
-                        <th>Vorname</th>
-                        <th>Nachname</th>
+                        <th>@Model.CultureStrings["Customer"] ID</th>
+                        <th>@Model.CultureStrings["FirstName"]</th>
+                        <th>@Model.CultureStrings["LastName"]</th>
                         @if (Model.OrderNumber != string.Empty)
                         {
-                            <th>Bestellnummer</th>
+                            <th>@Model.CultureStrings["OrderNumber"]</th>
                         }
                     </tr>
                 </thead>
@@ -62,13 +62,13 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Produkt</th>
-                                <th>Preis</th>
-                                <th>Größe</th>
-                                <th>Einheit</th>
-                                <th>Lagermenge</th>
-                                <th>Bestellmenge</th>
-                                <th>Kosten</th>
+                                <th>@Model.CultureStrings["Product"]</th>
+                                <th>@Model.CultureStrings["Price"]</th>
+                                <th>@Model.CultureStrings["Size"]</th>
+                                <th>@Model.CultureStrings["Unit"]</th>
+                                <th>@Model.CultureStrings["StockQuantity"]</th>
+                                <th>@Model.CultureStrings["OrderQuantity"]</th>
+                                <th>@Model.CultureStrings["Cost"]</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -89,7 +89,7 @@
                                 </tr>
                             }
                             <tr>
-                                <td colspan="7" style="text-align: right;">Gesamtsumme</td>
+                                <td colspan="7" style="text-align: right;">@Model.CultureStrings["Total"]</td>
                                 <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, Model.CalculatedOrder.Sum(item => item.Cost))</td>
                             </tr>
                             <tr></tr>
@@ -97,20 +97,20 @@
                     </table>
                     <table class="table">
                         <thead>
-                            <tr><th>Aktionen</th></tr>
+                            <tr><th>@Model.CultureStrings["Actions"]</th></tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td colspan="8" style="display: flex;">
                                     <input type="hidden" name="customerId" value="@Model.CustomerId" />
                                     <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
-                                    <button type="submit" formaction="?handler=CalculateCosts" style="margin-right: 10px;" class="btn btn-outline-primary">Berechnen</button>
-                                    <button type="submit" formaction="?handler=SubmitOrder" style="margin-right: 10px;" class="btn btn-outline-success">Senden</button>
-                                    <label class="col-form-label-lg" for="pickUpName" style="margin-right: 10px;">Pate: </label>
-                                    <input type="text" id="pickUpName" name="pickUpName" value="@(Model.OrderDetails.FirstOrDefault()?.PickUpName ?? "Selbstabholer")" />
-                                    <label class="col-form-label-lg" for="userName" style="margin-left: 10px; margin-right: 10px;">Bearbeiter: </label>
-                                    <input type="text" id="username" name="userName" value="@(Model.OrderDetails.FirstOrDefault()?.UserName ?? "Benutzer-1")" />
-                                    <button type="submit" formaction="?handler=CancelAction" style="margin-left: 30px;" class="btn btn-outline-primary">Abbrechen</button>
+                                    <button type="submit" formaction="?handler=CalculateCosts" style="margin-right: 10px;" class="btn btn-outline-primary">@Model.CultureStrings["Calculate"]</button>
+                                    <button type="submit" formaction="?handler=SubmitOrder" style="margin-right: 10px;" class="btn btn-outline-success">@Model.CultureStrings["Send"]</button>
+                                    <label class="col-form-label-lg" for="pickUpName" style="margin-right: 10px;">@Model.CultureStrings["Collector"]: </label>
+                                    <input type="text" id="pickUpName" name="pickUpName" value="@(Model.OrderDetails.FirstOrDefault()?.PickUpName ?? @Model.CultureStrings["SelfCollector"])" />
+                                    <label class="col-form-label-lg" for="userName" style="margin-left: 10px; margin-right: 10px;">@Model.CultureStrings["ServiceWorker"]: </label>
+                                    <input type="text" id="username" name="userName" value="@(Model.OrderDetails.FirstOrDefault()?.UserName ?? @Model.CultureStrings["ServiceWorker"] + " 1")" />
+                                    <button type="submit" formaction="?handler=CancelAction" style="margin-left: 30px;" class="btn btn-outline-primary">@Model.CultureStrings["Cancel"]</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -122,12 +122,12 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Bestellnummer</th>
-                            <th>Pate</th>
+                            <th>@Model.CultureStrings["OrderNumber"]</th>
+                            <th>@Model.CultureStrings["Collector"]</th>
                             <th>Bestellzeit</th>
-                            <th>Bearbeiter</th>
-                            <th>Bestellkosten</th>
-                            <th>Aktionen</th>
+                            <th>@Model.CultureStrings["ServiceWorker"]</th>
+                            <th>@Model.CultureStrings["OrderCost"]</th>
+                            <th>@Model.CultureStrings["Actions"]</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -144,17 +144,17 @@
                                     <td style="display: flex;">
                                         <form method="post" style="margin-right: 10px;" asp-page-handler="ToggleEditOrderForm">
                                             <input type="hidden" name="orderNumber" value="@order.OrderNumber" />
-                                            <button type="submit" class="btn btn-outline-primary">Bearbeiten</button>
+                                            <button type="submit" class="btn btn-outline-primary">@Model.CultureStrings["Edit"]</button>
                                         </form>
                                         <form method="post" onsubmit="return confirm('Sind Sie sicher, dass Sie Bestellung @order.OrderNumber löschen möchten?');" asp-page-handler="DeleteOrder">
                                             <input type="hidden" name="customerId" value="@Model.CustomerId" />
                                             <input type="hidden" name="orderNumber" value="@order.OrderNumber" />
-                                            <button type="submit" class="btn btn-outline-danger">löschen</button>
+                                            <button type="submit" class="btn btn-outline-danger">@Model.CultureStrings["Delete"]</button>
                                         </form>
                                     </td>
                                 }else
                                 {
-                                    <td style="color: red; font-weight: bold;">Gebucht!</td>
+                                    <td style="color: red; font-weight: bold;">@Model.CultureStrings["Booked"]!</td>
                                 }
                             </tr>
                         }

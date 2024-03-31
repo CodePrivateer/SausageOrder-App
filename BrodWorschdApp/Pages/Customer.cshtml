@@ -4,19 +4,19 @@
 <div class="container">
     <div class="content">
         <div class="customer-list">
-            <h2>Kunden</h2>
+            <h2>@Model.CultureStrings["Customers"]</h2>
             <div class="actions">
                 <form method="post">
-                    <button type="submit" class="btn btn-outline-primary" asp-page-handler="ToggleNewCustomerForm">Neuer Kunde</button>
+                    <button type="submit" class="btn btn-outline-primary" asp-page-handler="ToggleNewCustomerForm">@Model.CultureStrings["NewCustomer"]</button>
                 </form>
             </div>
             <table class="table">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Vorname</th>
-                        <th>Nachname</th>
-                        <th>Aktion</th>
+                        <th>@Model.CultureStrings["CustomerFirstName"]</th>
+                        <th>@Model.CultureStrings["CustomerLastName"]</th>
+                        <th>@Model.CultureStrings["Actions"]</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -27,14 +27,14 @@
                             <form method="post">
                             <td></td>
                             <td>
-                                <input type="text" name="firstName" placeholder="Vorname">
+                                <input type="text" name="firstName" placeholder="@Model.CultureStrings["FirstName"]">
                             </td>
                             <td>
-                                <input type="text" name="lastName" placeholder="Nachname">
+                                <input type="text" name="lastName" placeholder="@Model.CultureStrings["LastName"]">
                             </td>
                             <td style="display: flex;">
-                                <button type="submit" class="btn btn-outline-success" style="margin-right: 10px;" asp-page-handler="AddCustomer">Senden</button>
-                                <button type="submit" class="btn btn-outline-primary" asp-page-handler="CancelCustomer">Abbrechen</button>
+                                <button type="submit" class="btn btn-outline-success" style="margin-right: 10px;" asp-page-handler="AddCustomer">@Model.CultureStrings["Send"]</button>
+                                <button type="submit" class="btn btn-outline-primary" asp-page-handler="CancelCustomer">@Model.CultureStrings["Cancel"]</button>
                             </td>
                             </form>
                         </tr>
@@ -47,12 +47,12 @@
                             {
                                 <form method="post">
                                 <td></td>
-                                <td><input type="text" name="firstName" placeholder="Vorname" value="@customer.FirstName"></td>
-                                <td><input type="text" name="lastName" placeholder="Nachname" value="@customer.LastName"></td>
+                                <td><input type="text" name="firstName" placeholder="@Model.CultureStrings["FirstName"]" value="@customer.FirstName"></td>
+                                <td><input type="text" name="lastName" placeholder="@Model.CultureStrings["LastName"]" value="@customer.LastName"></td>
                                 <input type="hidden" name="customerId" value="@customer.ID" />
                                 <td style="display: flex;">
-                                    <button type="submit" class="btn btn-outline-success" style="margin-right: 10px;" asp-page-handler="EditCustomer">Senden</button>
-                                    <button type="submit" class="btn btn-outline-primary" asp-page-handler="CancelCustomer">Abbrechen</button>
+                                    <button type="submit" class="btn btn-outline-success" style="margin-right: 10px;" asp-page-handler="EditCustomer">@Model.CultureStrings["Send"]</button>
+                                    <button type="submit" class="btn btn-outline-primary" asp-page-handler="CancelCustomer">@Model.CultureStrings["Cancel"]</button>
                                 </td>
                                 </form>
                             }
@@ -67,15 +67,15 @@
                             <td style="display: flex;">
                                 <form method="post" style="margin-right: 10px;">
                                     <input type="hidden" name="customerId" value="@customer.ID" />
-                                    <a href="/CustomerOrders?customerId=@customer.ID" class="btn btn-outline-primary">Bestellungen</a>
+                                    <a href="/CustomerOrders?customerId=@customer.ID" class="btn btn-outline-primary">@Model.CultureStrings["Orders"]</a>
                                 </form>
                                 <form method="post" style="margin-right: 10px;" asp-page-handler="ToggleEditCustomerForm">
                                     <input type="hidden" name="customerId" value="@customer.ID" />
-                                    <button type="submit" class="btn btn-outline-primary">Bearbeiten</button>
+                                    <button type="submit" class="btn btn-outline-primary">@Model.CultureStrings["Edit"]</button>
                                 </form>
                                 <form method="post" onsubmit="return confirm('Sind Sie sicher, dass Sie @customer.FirstName @customer.LastName löschen möchten?');" asp-page-handler="DeleteCustomer">
                                     <input type="hidden" name="customerId" value="@customer.ID" />
-                                    <button type="submit" class="btn btn-outline-danger">löschen</button>
+                                    <button type="submit" class="btn btn-outline-danger">@Model.CultureStrings["Delete"]</button>
                                 </form>
                             </td>
                         </tr>

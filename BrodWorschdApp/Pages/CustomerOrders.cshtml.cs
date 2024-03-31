@@ -106,12 +106,6 @@ namespace BrodWorschdApp.Pages
                 var productId = item.Key;
                 var quantity = item.Value;
 
-                // Wenn die Menge 0 ist, überspringen Sie diesen Artikel
-                //if (quantity == 0)
-                //{
-                //    continue;
-                //}
-
                 // Abrufen der bestehenden Bestellung aus der Datenbank
                 var order = (await _databaseHandler.GetDataFromTable<CustomerOrdersTable>(o => o.OrderNumber == orderNumber && o.ProductId == productId)).FirstOrDefault();
 

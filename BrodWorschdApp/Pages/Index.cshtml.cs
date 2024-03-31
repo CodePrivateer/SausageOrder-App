@@ -4,7 +4,6 @@ namespace BrodWorschdApp.Pages
 {
     public class IndexModel : BasePageModel
     {
-
         public bool IsOrderViewVisible { get; set; }
 
         public IndexModel(DatabaseHandler databaseHandler, ILogger<IndexModel> logger, LanguageService languageService) : 
