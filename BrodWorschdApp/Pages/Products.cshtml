@@ -10,7 +10,8 @@
         <div class="products-list">
             <div class="actions">
                 <form method="post">
-                    <button type="submit" class="btn btn-outline-primary" asp-page-handler="ToggleNewProductForm">@Model.CultureStrings["NewProduct"]</button>
+                    <button type="submit" class="btn btn-outline-primary"
+                        asp-page-handler="ToggleNewProductForm">@Model.CultureStrings["NewProduct"]</button>
                 </form>
             </div>
             <table class="table">
@@ -34,13 +35,18 @@
                     {
                         <tr>
                             <form method="post">
-                            <td></td>
-                            <td><input type="text" name="productName" placeholder="@Model.CultureStrings["ProductName"]"></td>
-                            <td><input type="text" name="productPrice" placeholder="@Model.CultureStrings["Price"]"></td>
-                            <td><input type="text" name="productSize" placeholder="@Model.CultureStrings["Size"]"></td>
-                            <td><input type="text" name="productSizeUnit" placeholder="@Model.CultureStrings["Unit"]"></td>
-                            <td><input type="text" name="productInventory" placeholder="@Model.CultureStrings["StockQuantity"]"></td>
-                            <td><button type="submit" class="btn btn-outline-success" asp-page-handler="AddProduct">@Model.CultureStrings["Send"]</button></td>
+                                <td></td>
+                                <td><input type="text" name="productName"
+                                        placeholder="@Model.CultureStrings["ProductName"]"></td>
+                                <td><input type="text" name="productPrice" placeholder="@Model.CultureStrings["Price"]">
+                                </td>
+                                <td><input type="text" name="productSize" placeholder="@Model.CultureStrings["Size"]"></td>
+                                <td><input type="text" name="productSizeUnit" placeholder="@Model.CultureStrings["Unit"]">
+                                </td>
+                                <td><input type="text" name="productInventory"
+                                        placeholder="@Model.CultureStrings["StockQuantity"]"></td>
+                                <td><button type="submit" class="btn btn-outline-success"
+                                        asp-page-handler="AddProduct">@Model.CultureStrings["Send"]</button></td>
                             </form>
                         </tr>
                     }
@@ -50,17 +56,25 @@
                             @foreach (var product in Model.ProductList)
                             {
                                 <form method="post">
-                                <td></td>
-                                <td><input type="text" name="productName" placeholder="@Model.CultureStrings["ProductName"]" value="@product.ProductName"></td>
-                                <td><input type="text" name="productPrice" placeholder="@Model.CultureStrings["Price"]" value="@product.Price"></td>
-                                <td><input type="text" name="productSize" placeholder="@Model.CultureStrings["Size"]" value="@product.Size"></td>
-                                <td><input type="text" name="productSizeUnit" placeholder="@Model.CultureStrings["Unit"]" value="@product.Unit"></td>
-                                <td><input type="text" name="productInventory" placeholder="@Model.CultureStrings["StockQuantity"]" value="@product.Inventory"></td>
-                                <input type="hidden" name="productId" value="@product.ID" />
-                                <td style="display: flex;">
-                                    <button type="submit" class="btn btn-outline-success" style="margin-right: 10px;" asp-page-handler="EditProduct">@Model.CultureStrings["Send"]</button>
-                                    <button type="submit" class="btn btn-outline-primary" asp-page-handler="CancelEditProduct">@Model.CultureStrings["Cancel"]</button>
-                                </td>
+                                    <td></td>
+                                    <td><input type="text" name="productName" placeholder="@Model.CultureStrings["ProductName"]"
+                                            value="@product.ProductName"></td>
+                                    <td><input type="text" name="productPrice" placeholder="@Model.CultureStrings["Price"]"
+                                            value="@product.Price"></td>
+                                    <td><input type="text" name="productSize" placeholder="@Model.CultureStrings["Size"]"
+                                            value="@product.Size"></td>
+                                    <td><input type="text" name="productSizeUnit" placeholder="@Model.CultureStrings["Unit"]"
+                                            value="@product.Unit"></td>
+                                    <td><input type="text" name="productInventory"
+                                            placeholder="@Model.CultureStrings["StockQuantity"]" value="@product.Inventory">
+                                    </td>
+                                    <input type="hidden" name="productId" value="@product.ID" />
+                                    <td style="display: flex;">
+                                        <button type="submit" class="btn btn-outline-success" style="margin-right: 10px;"
+                                            asp-page-handler="EditProduct">@Model.CultureStrings["Send"]</button>
+                                        <button type="submit" class="btn btn-outline-primary"
+                                            asp-page-handler="CancelEditProduct">@Model.CultureStrings["Cancel"]</button>
+                                    </td>
                                 </form>
                             }
                         </tr>
@@ -74,21 +88,29 @@
                             <td>@product.Size</td>
                             <td>@product.Unit</td>
                             <td>@product.Inventory</td>
-                            @if (!Model.IsEditProductFormVisible)
+                            @if (Model != null)
                             {
-                                <td>@(Model?.OrderedQuantitiesPerProduct?.ContainsKey(product?.ID ?? 0) ?? false ? Model.OrderedQuantitiesPerProduct[product.ID].ToString() : "0")</td>
-                            }
+                                @if (!Model.IsEditProductFormVisible)
+                                {
+                                    <td>@(Model?.OrderedQuantitiesPerProduct?.ContainsKey(product?.ID ?? 0) ?? false ?
+                                            Model.OrderedQuantitiesPerProduct[product?.ID ?? 0].ToString() : "0")</td>
+                                }
 
-                            <td style="display: flex;">
-                                <form method="post" style="margin-right: 10px;" asp-page-handler="ToggleEditProductForm">
-                                    <input type="hidden" name="productId" value="@product.ID" />
-                                    <button type="submit" class="btn btn-outline-primary">@Model.CultureStrings["Edit"]</button>
-                                </form>
-                                <form method="post" onsubmit="return confirm('Sind Sie sicher, dass Sie Produkt Nr.: @product.ID - @product.ProductName löschen möchten, wenn Bestellungen vorhanden sind werden diese auch gelöscht?');" asp-page-handler="DeleteProduct">
-                                    <input type="hidden" name="productId" value="@product.ID" />
-                                    <button type="submit" class="btn btn-outline-danger">@Model.CultureStrings["Delete"]</button>
-                                </form>
-                            </td>
+                                <td style="display: flex;">
+                                    <form method="post" style="margin-right: 10px;" asp-page-handler="ToggleEditProductForm">
+                                        <input type="hidden" name="productId" value="@product?.ID" />
+                                        <button type="submit"
+                                            class="btn btn-outline-primary">@Model?.CultureStrings["Edit"]</button>
+                                    </form>
+                                    <form method="post"
+                                        onsubmit="return confirm('Sind Sie sicher, dass Sie Produkt Nr.: @product?.ID - @product?.ProductName löschen möchten, wenn Bestellungen vorhanden sind werden diese auch gelöscht?');"
+                                        asp-page-handler="DeleteProduct">
+                                        <input type="hidden" name="productId" value="@product?.ID" />
+                                        <button type="submit"
+                                            class="btn btn-outline-danger">@Model?.CultureStrings["Delete"]</button>
+                                    </form>
+                                </td>
+                            }
                         </tr>
                     }
                 </tbody>
