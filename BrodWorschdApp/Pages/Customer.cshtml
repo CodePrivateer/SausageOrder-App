@@ -73,9 +73,28 @@
                                     <input type="hidden" name="customerId" value="@customer.ID" />
                                     <button type="submit" class="btn btn-outline-primary">@Model.CultureStrings["Edit"]</button>
                                 </form>
-                                <form method="post" onsubmit="return confirm('Sind Sie sicher, dass Sie @customer.FirstName @customer.LastName löschen möchten?');" asp-page-handler="DeleteCustomer">
+                                <form method="post" asp-page-handler="DeleteCustomer">
                                     <input type="hidden" name="customerId" value="@customer.ID" />
-                                    <button type="submit" class="btn btn-outline-danger">@Model.CultureStrings["Delete"]</button>
+                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@customer.ID">
+                                        @Model.CultureStrings["Delete"]
+                                    </button>
+                                    <div class="modal fade" id="deleteModal-@customer.ID" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="deleteModalLabel">@Model.CultureStrings["ConfirmDeletion"]</h5>
+                                                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>@Model.CultureStrings["DeleteCustomerQuestion"] @customer.FirstName @customer.LastName?</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Model.CultureStrings["Cancel"]</button>
+                                                    <button type="submit" class="btn btn-danger">@Model.CultureStrings["Delete"]</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </form>
                             </td>
                         </tr>

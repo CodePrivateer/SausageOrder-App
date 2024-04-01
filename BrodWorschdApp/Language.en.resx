@@ -135,6 +135,9 @@
   <data name="Collector" xml:space="preserve">
     <value>Collector</value>
   </data>
+  <data name="ConfirmDeletion" xml:space="preserve">
+    <value>Confirm Deletion</value>
+  </data>
   <data name="Cost" xml:space="preserve">
     <value>Cost</value>
   </data>
@@ -155,6 +158,15 @@
   </data>
   <data name="Delete" xml:space="preserve">
     <value>Delete</value>
+  </data>
+  <data name="DeleteCustomerQuestion" xml:space="preserve">
+    <value>Do you really want to delete the customer</value>
+  </data>
+  <data name="DeleteOrderQuestion" xml:space="preserve">
+    <value>Are you sure you want to delete the order</value>
+  </data>
+  <data name="DeleteProductQuestion" xml:space="preserve">
+    <value>Do you really want to delete the product</value>
   </data>
   <data name="Deliver" xml:space="preserve">
     <value>Deliver</value>
@@ -265,7 +277,7 @@
     <value>Total-deliver</value>
   </data>
   <data name="TotalReturns" xml:space="preserve">
-    <value>Gesamt-Rückliefern</value>
+    <value>Total return</value>
   </data>
   <data name="Unit" xml:space="preserve">
     <value>Unit</value>
