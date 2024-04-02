@@ -135,6 +135,9 @@
   <data name="Collector" xml:space="preserve">
     <value>Collector</value>
   </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>Okay</value>
+  </data>
   <data name="ConfirmDeletion" xml:space="preserve">
     <value>Confirm Deletion</value>
   </data>
@@ -183,6 +186,9 @@
   <data name="LastName" xml:space="preserve">
     <value>Last name</value>
   </data>
+  <data name="MissingInput" xml:space="preserve">
+    <value>Missing Input</value>
+  </data>
   <data name="NewCustomer" xml:space="preserve">
     <value>New Customer</value>
   </data>
@@ -224,6 +230,9 @@
   </data>
   <data name="PayInPart" xml:space="preserve">
     <value>Pay in part</value>
+  </data>
+  <data name="PleaseEnterServiceWorker" xml:space="preserve">
+    <value>Please enter a service worker</value>
   </data>
   <data name="Price" xml:space="preserve">
     <value>Price</value>
