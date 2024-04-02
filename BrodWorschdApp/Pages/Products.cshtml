@@ -138,23 +138,18 @@
                                             <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@product?.ID">
                                                 @Model.CultureStrings["Delete"]
                                             </button>
-                                            <div class="modal fade" id="deleteModal-@product?.ID" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog" role="document">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="deleteModalLabel">@Model.CultureStrings["ConfirmDeletion"]</h5>
-                                                            <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <p>@Model.CultureStrings["DeleteProductQuestion"] @product?.ID - @product?.ProductName ?</p>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Model.CultureStrings["Cancel"]</button>
-                                                            <button type="submit" class="btn btn-danger">@Model.CultureStrings["Delete"]</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            @{
+                                                var deleteModal = new DeleteModalViewModel
+                        {
+                            ModalId = $"deleteModal-{product?.ID}",
+                            ConfirmDeletion = Model.CultureStrings["ConfirmDeletion"],
+                            DeleteQuestion = Model.CultureStrings["DeleteProductQuestion"],
+                            EntityToDelete = product?.ID + " - " + product?.ProductName,
+                            Cancel = Model.CultureStrings["Cancel"],
+                            Delete = Model.CultureStrings["Delete"]
+                        };
+                                            }
+                                            <partial name="_DeleteDialogModal" model="deleteModal" />
                                         </form>
                                     }
                                 </td>

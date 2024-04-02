@@ -64,7 +64,7 @@ namespace BrodWorschdApp.Pages
             }
             else if (valueDecimal.HasValue)
             {
-                decimal decimalValue = (decimal)valueDecimal.Value;
+                decimal decimalValue = valueDecimal.Value;
                 return decimalValue.ToString("C", new System.Globalization.CultureInfo("de-DE"));
             }
             else
@@ -171,7 +171,7 @@ namespace BrodWorschdApp.Pages
                     );
 
                     var orderNumberMatches = orderGroup.Items.Any(order =>
-                        (string.IsNullOrEmpty(orderNumber) || order.OrderNumber.Contains(orderNumber))
+                        string.IsNullOrEmpty(orderNumber) || order.OrderNumber.Contains(orderNumber)
                     );
 
                     if (customerMatches && orderNumberMatches)
@@ -226,7 +226,7 @@ namespace BrodWorschdApp.Pages
                 }
 
                 // Save the changes to the database
-                await _databaseHandler.UpdateDataInTable<ProductsTable>(product);
+                await _databaseHandler.UpdateDataInTable(product);
             }
         }
         public async Task UpdateInventoryAfterBooking(List<CustomerOrdersTable> unbookedProducts) // Ganze Bestellung
@@ -243,7 +243,7 @@ namespace BrodWorschdApp.Pages
                     product.Inventory -= order.Quantity;
 
                     // Speichern Sie die Änderungen in der Datenbank
-                    await _databaseHandler.UpdateDataInTable<ProductsTable>(product);
+                    await _databaseHandler.UpdateDataInTable(product);
                 }
             }
         }
@@ -265,7 +265,7 @@ namespace BrodWorschdApp.Pages
                     product.Inventory += order.Quantity;
 
                     // Speichern Sie die Änderungen in der Datenbank
-                    await _databaseHandler.UpdateDataInTable<ProductsTable>(product);
+                    await _databaseHandler.UpdateDataInTable(product);
                 }
             }
         }
