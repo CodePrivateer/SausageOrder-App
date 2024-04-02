@@ -1,0 +1,18 @@
+﻿@model InfoModalViewModel
+
+<div class="modal fade" id="@Model.ModalId" tabindex="-1" role="dialog" aria-labelledby="InfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="infoModalLabel">@Model.InformationTitel</h5>
+                <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>@Model.InformationText ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Model.Confirmation</button>
+            </div>
+        </div>
+    </div>
+</div>
