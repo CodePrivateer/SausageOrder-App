@@ -51,7 +51,7 @@
         {
             // Find the order
             var order = await _context.Set<CustomerOrdersTable>()
-                .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber && o.ProductId == productId);
+                .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber && o.ProductID == productId);
 
             if (order != null)
             {
@@ -66,7 +66,7 @@
         {
             // Find the order
             var order = await _context.Set<CustomerOrdersTable>()
-                .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber && o.ProductId == productId);
+                .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber && o.ProductID == productId);
 
             if (order != null)
             {
@@ -116,27 +116,27 @@
         public async Task<Dictionary<int, int>> GetAllOrderedQuantitiesPerProduct()
         {
             return await _context.CustomerOrders
-                .GroupBy(co => co.ProductId)
-                .Select(g => new { ProductId = g.Key, TotalQuantity = g.Sum(co => co.Quantity) })
-                .ToDictionaryAsync(t => t.ProductId, t => t.TotalQuantity);
+                .GroupBy(co => co.ProductID)
+                .Select(g => new { ProductID = g.Key, TotalQuantity = g.Sum(co => co.Quantity) })
+                .ToDictionaryAsync(t => t.ProductID, t => t.TotalQuantity);
         }
         // Nur die nicht gebuchten Bestellmenge je Produkt in eine Dictionary auflisten
         public async Task<Dictionary<int, int>> GetOrderedQuantitiesPerProduct()
         {
             return await _context.CustomerOrders
                 .Where(co => string.IsNullOrEmpty(co.Booked))
-                .GroupBy(co => co.ProductId)
-                .Select(g => new { ProductId = g.Key, TotalQuantity = g.Sum(co => co.Quantity) })
-                .ToDictionaryAsync(t => t.ProductId, t => t.TotalQuantity);
+                .GroupBy(co => co.ProductID)
+                .Select(g => new { ProductID = g.Key, TotalQuantity = g.Sum(co => co.Quantity) })
+                .ToDictionaryAsync(t => t.ProductID, t => t.TotalQuantity);
         }
         // Nur die gebuchten Bestellmenge je Produkt in eine Dictionary auflisten
         public async Task<Dictionary<int, int>> GetBookedQuantitiesPerProduct()
         {
             return await _context.CustomerOrders
                 .Where(co => co.Booked == "booked")
-                .GroupBy(co => co.ProductId)
-                .Select(g => new { ProductId = g.Key, TotalQuantity = g.Sum(co => co.Quantity) })
-                .ToDictionaryAsync(t => t.ProductId, t => t.TotalQuantity);
+                .GroupBy(co => co.ProductID)
+                .Select(g => new { ProductID = g.Key, TotalQuantity = g.Sum(co => co.Quantity) })
+                .ToDictionaryAsync(t => t.ProductID, t => t.TotalQuantity);
         }
     }
     public class DatabaseContext : DbContext
@@ -166,33 +166,25 @@
     }
     public class CustomersTable
     {
-        public CustomersTable()
-        {
-            Orders = new List<CustomerOrdersTable>();
-        }
         public int ID { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
-        public virtual ICollection<CustomerOrdersTable> Orders { get; set; }  // Navigationseigenschaft für Bestellungen hinzufügen
+        public virtual ICollection<CustomerOrdersTable>? Orders { get; set; }  // Navigationseigenschaft für Bestellungen hinzufügen
     }
 
     public class CustomerOrdersTable
     {
-        public CustomerOrdersTable()
-        {
-            Customer = new CustomersTable();
-        }
         public int ID { get; set; }
         public string OrderNumber { get; set; } = string.Empty;
-        public int CustomerId { get; set; }
-        public int ProductId { get; set; }
+        public int CustomerID { get; set; }
+        public int ProductID { get; set; }
         public int Quantity { get; set; }
         public string Date { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
         public string? PickUpName { get; set; }
         public string? Booked { get; set; }
         public string? Paid { get; set; }
-        public virtual CustomersTable Customer { get; set; }
+        public virtual CustomersTable? Customer { get; set; }
         // Sie können hier weitere Eigenschaften hinzufügen, die eine Bestellung haben könnte
     }
     public class ProductsTable

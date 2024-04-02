@@ -81,10 +81,10 @@ namespace BrodWorschdApp.Pages
                 {
                     OrderNumber = group.Key,
                     Items = group.ToList(),
-                    TotalPrice = (float)group.Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductId)?.Price ?? 0)),
-                    TotalDelivered = (float)group.Where(item => (item.Booked ?? "").ToLower() == "booked").Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductId)?.Price ?? 0)),
-                    TotalOpen = (float)group.Where(item => (item.Booked ?? "").ToLower() == "").Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductId)?.Price ?? 0)),
-                    TotalPaid = (float)group.Where(item => (item.Paid ?? "").ToLower() == "paid").Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductId)?.Price ?? 0))
+                    TotalPrice = (float)group.Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductID)?.Price ?? 0)),
+                    TotalDelivered = (float)group.Where(item => (item.Booked ?? "").ToLower() == "booked").Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductID)?.Price ?? 0)),
+                    TotalOpen = (float)group.Where(item => (item.Booked ?? "").ToLower() == "").Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductID)?.Price ?? 0)),
+                    TotalPaid = (float)group.Where(item => (item.Paid ?? "").ToLower() == "paid").Sum(item => item.Quantity * (products.FirstOrDefault(p => p.ID == item.ProductID)?.Price ?? 0))
                 })
                 .ToList();
         }
@@ -126,8 +126,8 @@ namespace BrodWorschdApp.Pages
             var orders = await _databaseHandler.GetDataFromTable<CustomerOrdersTable>(o => o.OrderNumber == orderNumber);
 
             // Bestimmen Sie die customerId und orderQuantity
-            int customerId = orders.FirstOrDefault()?.CustomerId ?? 0;
-            var orderQuantity = orders.ToDictionary(o => o.ProductId, o => o.Quantity);
+            int customerId = orders.FirstOrDefault()?.CustomerID ?? 0;
+            var orderQuantity = orders.ToDictionary(o => o.ProductID, o => o.Quantity);
 
             // Rufen Sie CalculateCosts mit den bestimmten Parametern auf
             await CalculateCost(customerId, orderQuantity);
@@ -210,7 +210,7 @@ namespace BrodWorschdApp.Pages
             var product = await _databaseHandler.FindProductById<ProductsTable>(productId);
 
             // Find the order with the given productId
-            var order = orderDetails.FirstOrDefault(o => o.ProductId == productId);
+            var order = orderDetails.FirstOrDefault(o => o.ProductID == productId);
 
             if (product != null && order != null)
             {
@@ -235,7 +235,7 @@ namespace BrodWorschdApp.Pages
             foreach (var order in unbookedProducts)
             {
                 // Finden Sie das entsprechende Produkt in der ProductsTable
-                var product = await _databaseHandler.FindProductById<ProductsTable>(order.ProductId);
+                var product = await _databaseHandler.FindProductById<ProductsTable>(order.ProductID);
 
                 // Aktualisieren Sie das Inventory des Produkts
                 if (product != null && product.Inventory != null)
@@ -257,7 +257,7 @@ namespace BrodWorschdApp.Pages
             foreach (var order in orderDetails)
             {
                 // Finden Sie das entsprechende Produkt in der ProductsTable
-                var product = await _databaseHandler.FindProductById<ProductsTable>(order.ProductId);
+                var product = await _databaseHandler.FindProductById<ProductsTable>(order.ProductID);
 
                 // Aktualisieren Sie das Inventory des Produkts
                 if (product != null && product.Inventory != null)

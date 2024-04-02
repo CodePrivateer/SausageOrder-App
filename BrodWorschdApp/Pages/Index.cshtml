@@ -75,7 +75,7 @@
                                         <td style="white-space: nowrap">@product.Unit</td>
                                         <td>@orderItem.Quantity</td>
                                         <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, orderItem.Cost)</td>
-                                        @if (Model.OrderDetails.FirstOrDefault(o => o.ProductId == product.ID)?.Booked != "booked")
+                                        @if (Model.OrderDetails.FirstOrDefault(o => o.ProductID == product.ID)?.Booked != "booked")
                                         {
                                             <td>
                                                 <form method="post" style="margin-right: 10px;" asp-page-handler="BookOrderItem">
@@ -97,7 +97,7 @@
                                                 </form>
                                             </td>
                                         }
-                                        @if (Model.OrderDetails.FirstOrDefault(o => o.ProductId == product.ID)?.Paid != "paid")
+                                        @if (Model.OrderDetails.FirstOrDefault(o => o.ProductID == product.ID)?.Paid != "paid")
                                         {
                                             <td>
                                                 <form method="post" style="margin-right: 10px;" asp-page-handler="PayOrderItem">
@@ -215,7 +215,7 @@
                             {
                                 <tr>
                                     <td>@order.OrderNumber</td>
-                                    <td>@order.Items.First().CustomerId</td>
+                                    <td>@order.Items.First().CustomerID</td>
                                     <td>@order.Items.First().Customer.FirstName @order.Items.First().Customer.LastName</td>
                                     <td style="text-align: right;">@(order.Items.First().PickUpName ?? @Model.CultureStrings["SelfCollector"])</td>
                                     <td style="text-align: right;">@BasePageModel.FormatAsEuro(@order.TotalPrice)</td>

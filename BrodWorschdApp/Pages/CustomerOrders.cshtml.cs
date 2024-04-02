@@ -35,7 +35,7 @@ namespace BrodWorschdApp.Pages
             CustomerId = customerId;
             OrderStatus = "";
 
-            var orders = await _databaseHandler.GetCustomerOrdersWithDetails(co => co.CustomerId == CustomerId);
+            var orders = await _databaseHandler.GetCustomerOrdersWithDetails(co => co.CustomerID == CustomerId);
             var products = await _databaseHandler.GetDataFromTable<ProductsTable>(x => true);
             GroupedOrdersList = CalculateGroupedOrders(orders, products);
             CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>(x => x.ID == CustomerId);
@@ -83,7 +83,8 @@ namespace BrodWorschdApp.Pages
             }
             PickUpName = pickUpName;
             UserName = userName;
-
+            Console.WriteLine(customerId);
+            
             if (orderNumber == null)
             {
                 // Ermitteln Sie die maximale OrderNumber
@@ -107,14 +108,14 @@ namespace BrodWorschdApp.Pages
                 var quantity = item.Value;
 
                 // Abrufen der bestehenden Bestellung aus der Datenbank
-                var order = (await _databaseHandler.GetDataFromTable<CustomerOrdersTable>(o => o.OrderNumber == orderNumber && o.ProductId == productId)).FirstOrDefault();
+                var order = (await _databaseHandler.GetDataFromTable<CustomerOrdersTable>(o => o.OrderNumber == orderNumber && o.ProductID == productId)).FirstOrDefault();
 
                 if (order != null)
                 {
                     Console.WriteLine(order.Quantity + " " + quantity);
                     if (order.Quantity >= 0 && quantity == 0)
                     {
-                        await _databaseHandler.DeleteDataFromTable<CustomerOrdersTable>(o => o.OrderNumber == orderNumber && o.ProductId == productId);
+                        await _databaseHandler.DeleteDataFromTable<CustomerOrdersTable>(o => o.OrderNumber == orderNumber && o.ProductID == productId);
                         continue;
                     }
 
@@ -133,8 +134,8 @@ namespace BrodWorschdApp.Pages
                     order = new CustomerOrdersTable
                     {
                         OrderNumber = orderNumber,
-                        CustomerId = customerId,
-                        ProductId = productId, // Setzen Sie die ProductId
+                        CustomerID = customerId,
+                        ProductID = productId, // Setzen Sie die ProductId
                         Quantity = quantity, // Setzen Sie die Quantity
                         Date = DateTime.Now.ToString(),
                         UserName = userName,
