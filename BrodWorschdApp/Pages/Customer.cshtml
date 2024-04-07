@@ -1,14 +1,26 @@
 ﻿@page
 @model CustomerModel
 
+@{
+    var paginationView = new PaginationViewModel<CustomersTable>
+            {
+                CurrentPage = Model.Pagination.CurrentPage,
+                TotalPages = Model.Pagination.TotalPages,
+                CultureStrings = Model.CultureStrings,
+            };
+}
+
 <div class="container">
     <div class="content">
         <div class="customer-list">
-            <h2>@Model.CultureStrings["Customers"]</h2>
-            <div class="actions">
+            <div class="actions" style="display: flex;">
+                <h2>@Model.CultureStrings["Customers"]</h2>
                 <form method="post">
-                    <button type="submit" class="btn btn-outline-primary" asp-page-handler="ToggleNewCustomerForm">@Model.CultureStrings["NewCustomer"]</button>
+                    <button style="margin-left: 50px; margin-right: 30px; white-space: nowrap;" type="submit" class="btn btn-outline-primary" asp-page-handler="ToggleNewCustomerForm">@Model.CultureStrings["NewCustomer"]</button>
                 </form>
+                <div style="width: 100%; display: flex; justify-content: center;">
+                    <partial name="_PaginationViewModel" model="paginationView" />
+                </div>
             </div>
             <table class="table">
                 <thead>

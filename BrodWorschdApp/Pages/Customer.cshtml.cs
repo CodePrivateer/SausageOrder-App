@@ -7,15 +7,26 @@ public class CustomerModel : BasePageModel
     public bool IsNewCustomerFormVisible { get; set; }
     public bool IsEditCustomerFormVisible { get; set; }
 
+    public PaginationViewModel<CustomersTable> Pagination { get; set; } = new PaginationViewModel<CustomersTable>();
+
     public CustomerModel(DatabaseHandler databaseHandler, ILogger<CustomerModel> logger, LanguageService languageService) :
             base(databaseHandler, logger, languageService)
     {
     }
 
-    public async Task<IActionResult> OnGetAsync(string culture)
+    public async Task<IActionResult> OnGetAsync(string culture, int currentPage = 1)
     {
-        // Hier können Sie die Kundenliste aus der Datenbank abrufen
-        CustomerList = await _databaseHandler.GetDataFromTable<CustomersTable>();
+        // Retrieve the customer list from the database here
+        var customers = await _databaseHandler.GetDataFromTable<CustomersTable>();
+
+        // Set the current page
+        Pagination.CurrentPage = currentPage;
+
+        // Call the Paginate method and assign the result to CustomerList
+        CustomerList = Pagination.Paginate(customers, Pagination.CurrentPage);
+
+        // Calculate the total number of pages
+        Pagination.TotalPages = Pagination.GetTotalPages(customers);
 
         // Setup of the Language
         if (!string.IsNullOrEmpty(culture))
@@ -25,10 +36,11 @@ public class CustomerModel : BasePageModel
         }
         return Page();
     }
+
     public async Task OnPostCancelCustomer()
     {
-        IsEditCustomerFormVisible=false;
-        IsNewCustomerFormVisible =false;
+        IsEditCustomerFormVisible = false;
+        IsNewCustomerFormVisible = false;
         await OnGetAsync(Culture);
     }
     public async Task OnPostAddCustomerAsync(string firstName, string lastName)
