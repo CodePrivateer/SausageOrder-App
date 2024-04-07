@@ -216,7 +216,7 @@
                                 <tr>
                                     <td>@order.OrderNumber</td>
                                     <td>@order.Items.First().CustomerID</td>
-                                    <td>@order.Items.First().Customer.FirstName @order.Items.First().Customer.LastName</td>
+                                    <td>@order.Items.First().Customer?.FirstName @order.Items.First().Customer?.LastName</td>
                                     <td style="text-align: right;">@(order.Items.First().PickUpName ?? @Model.CultureStrings["SelfCollector"])</td>
                                     <td style="text-align: right;">@BasePageModel.FormatAsEuro(@order.TotalPrice)</td>
                                     <td style="text-align: right;">@BasePageModel.FormatAsEuro(@order.TotalDelivered)</td>
