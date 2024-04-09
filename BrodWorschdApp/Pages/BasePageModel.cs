@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Localization;
+using System.Collections.Generic;
 
 namespace BrodWorschdApp.Pages
 {
@@ -183,6 +184,7 @@ namespace BrodWorschdApp.Pages
             }
             await GetSums(false);
         }
+
         public async Task GetSums(bool refreshData = true)
         {
             if (refreshData)

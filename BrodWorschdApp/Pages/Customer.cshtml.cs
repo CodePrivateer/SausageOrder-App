@@ -1,6 +1,7 @@
 using BrodWorschdApp;
 using BrodWorschdApp.Pages;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 public class CustomerModel : BasePageModel
 {
@@ -9,24 +10,38 @@ public class CustomerModel : BasePageModel
 
     public PaginationViewModel<CustomersTable> Pagination { get; set; } = new PaginationViewModel<CustomersTable>();
 
+    public SearchModel SearchData { get; set; }
+
     public CustomerModel(DatabaseHandler databaseHandler, ILogger<CustomerModel> logger, LanguageService languageService) :
             base(databaseHandler, logger, languageService)
     {
+        SearchData = new SearchModel
+        {
+            { "FirstName", "" },
+            { "LastName", "" }
+        };
     }
 
     public async Task<IActionResult> OnGetAsync(string culture, int currentPage = 1)
     {
-        // Retrieve the customer list from the database here
-        var customers = await _databaseHandler.GetDataFromTable<CustomersTable>();
+        // Abrufen der Filterinformationen aus der Sitzung
+        var filtersJson = HttpContext.Session.GetString("filters");
+        if (!string.IsNullOrEmpty(filtersJson))
+        {
+            var filters = JsonConvert.DeserializeObject<SearchModel>(filtersJson);
+            if (filters != null)
+            {
+                SearchData.CurrentFilters = filters;
+                await OnPostSearch(filters, currentPage);
+            }
+        }
+        else
+        {
+            // Retrieve the customer list from the database here
+            var customers = await _databaseHandler.GetDataFromTable<CustomersTable>();
 
-        // Set the current page
-        Pagination.CurrentPage = currentPage;
-
-        // Call the Paginate method and assign the result to CustomerList
-        CustomerList = Pagination.Paginate(customers, Pagination.CurrentPage);
-
-        // Calculate the total number of pages
-        Pagination.TotalPages = Pagination.GetTotalPages(customers);
+            GetPagination(customers, currentPage);
+        }
 
         // Setup of the Language
         if (!string.IsNullOrEmpty(culture))
@@ -34,6 +49,29 @@ public class CustomerModel : BasePageModel
             _languageservice.SetCulture(culture);
             return RedirectToPage();
         }
+        return Page();
+    }
+
+    public void GetPagination(List<CustomersTable> customers, int currentPage = 1)
+    {
+        Pagination.CurrentPage = currentPage;
+
+        // Call the Paginate method and assign the result to CustomerList
+        CustomerList = Pagination.Paginate(customers, Pagination.CurrentPage);
+
+        // Calculate the total number of pages
+        Pagination.TotalPages = Pagination.GetTotalPages(customers);
+    }
+
+    public async Task<IActionResult> OnPostSearch(SearchModel data, int currentPage = 1)
+    {
+        // Retrieve the customer list from the database here
+        var customers = await _databaseHandler.GetDataFromTable<CustomersTable>();
+        var filteredCustomerList = SearchData.FilterList(customers, data);
+        GetPagination(filteredCustomerList, currentPage);
+        // Speichern Sie die Filterinformationen in der Sitzung
+        HttpContext.Session.SetString("filters", JsonConvert.SerializeObject(data));
+        SearchData.CurrentFilters = data;
         return Page();
     }
 

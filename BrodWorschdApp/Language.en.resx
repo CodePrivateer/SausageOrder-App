@@ -198,8 +198,8 @@
   <data name="NewProduct" xml:space="preserve">
     <value>New Product</value>
   </data>
-  <data name="NextPage" xml:space="preserve">
-    <value>Next Page</value>
+  <data name="Next" xml:space="preserve">
+    <value>Next</value>
   </data>
   <data name="OrderCost" xml:space="preserve">
     <value>Order-Cost</value>
@@ -237,8 +237,8 @@
   <data name="PleaseEnterServiceWorker" xml:space="preserve">
     <value>Please enter a service worker</value>
   </data>
-  <data name="PreviousPage" xml:space="preserve">
-    <value>Previous Page</value>
+  <data name="Previous" xml:space="preserve">
+    <value>Previous</value>
   </data>
   <data name="Price" xml:space="preserve">
     <value>Price</value>

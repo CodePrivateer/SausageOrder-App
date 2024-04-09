@@ -1,7 +1,6 @@
 using BrodWorschdApp;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
-using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +20,8 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 });
 //Add Language Resource Service
 builder.Services.AddSingleton<LanguageService>();
+// Add session support
+builder.Services.AddSession();
 
 var app = builder.Build();
 
@@ -40,5 +41,7 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
+
+app.UseSession();
 
 app.Run();
