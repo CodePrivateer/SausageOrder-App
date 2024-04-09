@@ -31,7 +31,6 @@ public class CustomerModel : BasePageModel
             var filters = JsonConvert.DeserializeObject<SearchModel>(filtersJson);
             if (filters != null)
             {
-                SearchData.CurrentFilters = filters;
                 await OnPostSearch(filters, currentPage);
             }
         }
