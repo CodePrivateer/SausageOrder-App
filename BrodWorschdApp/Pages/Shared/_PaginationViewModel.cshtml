@@ -21,6 +21,9 @@
         @if (Model.CurrentPage > 3)
         {
             <li class="page-item">
+                <a class="page-link" asp-page=".@pagePath" asp-route-currentPage="1">1</a>
+            </li>
+            <li class="page-item">
                 <a class="page-link" asp-page=".@pagePath" asp-route-currentPage="@(Model.CurrentPage - 5)">...</a>
             </li>
         }
@@ -44,6 +47,9 @@
         {
             <li class="page-item">
                 <a class="page-link" asp-page=".@pagePath" asp-route-currentPage="@(Model.CurrentPage + 5)">...</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" asp-page=".@pagePath" asp-route-currentPage="@Model.TotalPages">@Model.TotalPages</a>
             </li>
         }
 
