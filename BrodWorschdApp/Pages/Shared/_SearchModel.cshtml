@@ -1,13 +1,15 @@
 ﻿@model SearchModel
 
-<form method="post" asp-page-handler="Search">
-    @foreach (var item in Model)
-    {
-        <div class="form-group">
-            <label>@item.Key</label>
-            <input type="text" name="@item.Key" value="@(Model.CurrentFilters != null && Model.CurrentFilters.ContainsKey(item.Key) ? Model.CurrentFilters[item.Key] : "")" class="form-control" />
-        </div>
-    }
-    <button type="submit" class="btn btn-primary">Suchen</button>
+<form method="post" asp-page-handler="Search" style="display: flex; flex-direction: row; align-items: center;">
+    <div class="form-group" style="display: flex;">
+        @foreach (var item in Model)
+        {
+            <div class="form-group" style="margin-right: 10px;">
+                <label>@item.Key</label>
+                <input type="text" name="@item.Key" value="@(Model.CurrentFilters != null && Model.CurrentFilters.ContainsKey(item.Key) ? Model.CurrentFilters[item.Key] : "")" class="form-control" />
+            </div>
+        }
+        <button type="submit" class="btn btn-primary">Suchen</button>
+    </div>
 </form>
 

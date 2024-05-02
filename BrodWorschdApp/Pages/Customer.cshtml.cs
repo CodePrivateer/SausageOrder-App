@@ -54,12 +54,12 @@ public class CustomerModel : BasePageModel
     public void GetPagination(List<CustomersTable> customers, int currentPage = 1)
     {
         Pagination.CurrentPage = currentPage;
-
+        int pagePerSite = 10;
         // Call the Paginate method and assign the result to CustomerList
-        CustomerList = Pagination.Paginate(customers, Pagination.CurrentPage);
+        CustomerList = Pagination.Paginate(customers, Pagination.CurrentPage, pagePerSite);
 
         // Calculate the total number of pages
-        Pagination.TotalPages = Pagination.GetTotalPages(customers);
+        Pagination.TotalPages = Pagination.GetTotalPages(customers,pagePerSite);
     }
 
     public async Task<IActionResult> OnPostSearch(SearchModel data, int currentPage = 1)
