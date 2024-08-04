@@ -2,7 +2,7 @@ namespace BrodWorschdApp
 {
     public class SearchModel : Dictionary<string, string>
     {
-        public Dictionary<string, string> CurrentFilters { get; set; }
+        public Dictionary<string, string>? CurrentFilters { get; set; }
         public List<T> FilterList<T>(List<T> list, Dictionary<string, string> filters)
         {
             var filteredList = new List<T>();
