@@ -1,6 +1,15 @@
 ﻿@page
 @model IndexModel
 @{
+    var paginationView = new PaginationViewModel<GroupedOrder>
+            {
+                CurrentPage = Model.Pagination.CurrentPage,
+                TotalPages = Model.Pagination.TotalPages,
+                CultureStrings = Model.CultureStrings,
+            };
+}
+
+@{
     ViewData["Title"] = @Model.CultureStrings["Orders"];
 }
 
@@ -174,6 +183,7 @@
                 }
                 else
                 {
+                    <partial name="_PaginationViewModel" model="paginationView" />
                     <form method="post" asp-page-handler="FilterOrders">
                         <div style="display: flex; justify-content: space-between;">
                             <div style="margin-right:5px">

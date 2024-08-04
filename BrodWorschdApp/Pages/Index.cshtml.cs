@@ -5,15 +5,19 @@ namespace BrodWorschdApp.Pages
     public class IndexModel : BasePageModel
     {
         public bool IsOrderViewVisible { get; set; }
+        public PaginationViewModel<GroupedOrder> Pagination { get; set; } = new PaginationViewModel<GroupedOrder>();
 
         public IndexModel(DatabaseHandler databaseHandler, ILogger<IndexModel> logger, LanguageService languageService) : 
             base(databaseHandler, logger, languageService)
         {
         }
 
-        public async Task<IActionResult> OnGetAsync(string culture)
+        public async Task<IActionResult> OnGetAsync(string culture, int currentPage = 1)
         {
             await GetSums();
+            await GetGroupedOrderList();
+            Console.WriteLine (currentPage);
+            GetPagination(GroupedOrdersList, currentPage);
 
             // Setup of the Language
             if (!string.IsNullOrEmpty(culture))
@@ -22,6 +26,17 @@ namespace BrodWorschdApp.Pages
                 return RedirectToPage();
             }
             return Page();
+        }
+
+        public void GetPagination(List<GroupedOrder> groupedOrdersList, int currentPage = 1)
+        {
+            Pagination.CurrentPage = currentPage;
+            int pagePerSite = 10;
+            // Call the Paginate method and assign the result to CustomerList
+            GroupedOrdersList = Pagination.Paginate(groupedOrdersList, Pagination.CurrentPage, pagePerSite);
+
+            // Calculate the total number of pages
+            Pagination.TotalPages = Pagination.GetTotalPages(groupedOrdersList, pagePerSite);
         }
 
         public async Task OnPostToggleOrderViewAsync(int customerId, string orderNumber, string isOrderViewVisible = "")
