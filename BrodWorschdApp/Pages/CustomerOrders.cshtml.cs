@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Localization;
+using System.Diagnostics;
 
 namespace BrodWorschdApp.Pages
 
@@ -8,7 +8,6 @@ namespace BrodWorschdApp.Pages
     {
         public bool IsEditOrderFormVisible { get; set; }
         public bool IsNewOrderFormVisible { get; set; }
-
         public CustomerOrdersModel(DatabaseHandler databaseHandler, ILogger<CustomerOrdersModel> logger, LanguageService languageService) :
             base(databaseHandler, logger, languageService)
         {
