@@ -9,7 +9,8 @@
                 <input type="text" name="@item.Key" value="@(Model.CurrentFilters != null && Model.CurrentFilters.ContainsKey(item.Key) ? Model.CurrentFilters[item.Key] : "")" class="form-control" />
             </div>
         }
-        <button type="submit" class="btn btn-primary">Suchen</button>
     </div>
+    <button type="submit" class="btn btn-primary" formaction="?handler=Search">@Model.CultureStrings["Search"]</button>
+    <button type="submit" class="btn btn-secondary" formaction="?handler=ClearFilters" style="margin-left: 10px;">Filter löschen</button>
 </form>
 

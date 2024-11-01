@@ -20,6 +20,7 @@ public class CustomerModel : BasePageModel
             { "FirstName", "" },
             { "LastName", "" }
         };
+        SearchData.CultureStrings = CultureStrings;
     }
 
     public async Task<IActionResult> OnGetAsync(string culture, int currentPage = 1)

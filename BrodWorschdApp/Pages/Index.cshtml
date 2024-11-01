@@ -184,27 +184,7 @@
                 else
                 {
                     <partial name="_PaginationViewModel" model="paginationView" />
-                    <form method="post" asp-page-handler="FilterOrders">
-                        <div style="display: flex; justify-content: space-between;">
-                            <div style="margin-right:5px">
-                                <label for="orderNumber">@Model.CultureStrings["OrderNumber"]:</label>
-                                <input type="text" id="orderNumber" name="orderNumber" />
-                            </div>
-                            <div style="margin-right:5px">
-                                <label for="customerFirstName">@Model.CultureStrings["CustomerFirstName"]:</label>
-                                <input type="text" id="customerFirstName" name="customerFirstName" />
-                            </div>
-                            <div style="margin-right:5px">
-                                <label for="customerLastName">@Model.CultureStrings["CustomerLastName"]:</label>
-                                <input type="text" id="customerLastName" name="customerLastName" />
-                            </div>
-                            <div style="margin-right:5px">
-                                <label for="pickUpName">@Model.CultureStrings["Collector"]:</label>
-                                <input type="text" id="pickUpName" name="pickUpName" />
-                            </div>
-                            <button type="submit" class="btn btn-outline-primary" style="margin-left: 10px">@Model.CultureStrings["Search"]</button>
-                        </div>
-                    </form>
+                    <partial name="_SearchModel" model="@Model.SearchData" />
                     <table class="table">
                         <thead>
                             <tr>

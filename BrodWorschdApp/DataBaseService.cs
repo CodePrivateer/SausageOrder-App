@@ -206,7 +206,7 @@
         public float TotalOpen { get; set; }
         public float TotalPaid { get; set; }
         public List<ProductsTable> Products { get; set; }  // Liste der Produkte hinzufügen
-        public string? PickUpName { get; set; }
+        // public string? PickUpName { get; set; }
 
         public GroupedOrder()
         {

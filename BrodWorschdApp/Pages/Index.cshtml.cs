@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace BrodWorschdApp.Pages
 {
@@ -6,19 +7,40 @@ namespace BrodWorschdApp.Pages
     {
         public bool IsOrderViewVisible { get; set; }
         public PaginationViewModel<GroupedOrder> Pagination { get; set; } = new PaginationViewModel<GroupedOrder>();
-
+        public SearchModel SearchData { get; set; } = new SearchModel();
         public IndexModel(DatabaseHandler databaseHandler, ILogger<IndexModel> logger, LanguageService languageService) : 
             base(databaseHandler, logger, languageService)
         {
+                SearchData = new SearchModel
+            {
+                { "OrderNumber", "" },
+                { "FirstName", "" },
+                { "LastName", "" },
+                { "PickUpName", "" }
+            };
+            SearchData.CultureStrings = CultureStrings;
         }
 
         public async Task<IActionResult> OnGetAsync(string culture, int currentPage = 1)
         {
             await GetSums();
-            await GetGroupedOrderList();
-            Console.WriteLine (currentPage);
-            GetPagination(GroupedOrdersList, currentPage);
+            // Abrufen der Filterinformationen aus der Sitzung
+            var filtersJson = HttpContext.Session.GetString("filterGroupedOrder");
+            if (!string.IsNullOrEmpty(filtersJson))
+            {
+                var filters = JsonConvert.DeserializeObject<SearchModel>(filtersJson);
+                if (filters != null)
+                {
+                    await OnPostSearch(filters, currentPage);
+                }
+            }
+            else
+            {
+                // Retrieve the customer list from the database here
+                await GetGroupedOrderList();
 
+                GetPagination(GroupedOrdersList, currentPage);
+            }
             // Setup of the Language
             if (!string.IsNullOrEmpty(culture))
             {
@@ -37,6 +59,25 @@ namespace BrodWorschdApp.Pages
 
             // Calculate the total number of pages
             Pagination.TotalPages = Pagination.GetTotalPages(groupedOrdersList, pagePerSite);
+        }
+
+        public async Task<IActionResult> OnPostSearch(SearchModel data, int currentPage = 1)
+        {
+            // Retrieve the GroupedOrder list from the database here
+            await GetGroupedOrderList();
+            var filteredGroupedOrdersList = SearchData.FilterList(GroupedOrdersList, data);
+            GetPagination(filteredGroupedOrdersList, currentPage);
+            // Speichern Sie die Filterinformationen in der Sitzung
+            HttpContext.Session.SetString("filterGroupedOrder", JsonConvert.SerializeObject(data));
+            SearchData.CurrentFilters = data;
+            return Page();
+        }
+        public async Task<IActionResult> OnPostClearFilters(int currentPage = 1)
+        {
+            // Retrieve the GroupedOrder list from the database here
+            await GetGroupedOrderList();
+            GetPagination(GroupedOrdersList, currentPage);
+            return Page();
         }
 
         public async Task OnPostToggleOrderViewAsync(int customerId, string orderNumber, string isOrderViewVisible = "")

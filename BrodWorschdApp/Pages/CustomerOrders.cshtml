@@ -66,66 +66,66 @@
             @if (Model.IsNewOrderFormVisible || Model.IsEditOrderFormVisible)
             {
                 <form method="post" onsubmit="return checkInput();">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>@Model.CultureStrings["Product"]</th>
-                            <th>@Model.CultureStrings["Price"]</th>
-                            <th>@Model.CultureStrings["Size"]</th>
-                            <th>@Model.CultureStrings["Unit"]</th>
-                            <th>@Model.CultureStrings["StockQuantity"]</th>
-                            <th>@Model.CultureStrings["OrderQuantity"]</th>
-                            <th>@Model.CultureStrings["Cost"]</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                                                   
-                        @foreach (var product in Model.ProductList)
-                        {
-                            var orderItem = Model.CalculatedOrder.FirstOrDefault(o => o.ProductId == product.ID);
+                    <table class="table">
+                        <thead>
                             <tr>
-                                <td>@product.ID</td>
-                                <td>@product.ProductName</td>
-                                <td style="white-space: nowrap">@BasePageModel.FormatAsEuro(product.Price)</td>
-                                <td>@product.Size</td>
-                                <td style="white-space: nowrap">@product.Unit</td>
-                                <td>@product.Inventory</td>
-                                <td>
-                                    <input type="number" min="0" name="orderQuantity[@product.ID]" id="quantity_@product.ID" value="@orderItem?.Quantity" />
-                                </td>
-                                <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, orderItem?.Cost)</td>
+                                <th>ID</th>
+                                <th>@Model.CultureStrings["Product"]</th>
+                                <th>@Model.CultureStrings["Price"]</th>
+                                <th>@Model.CultureStrings["Size"]</th>
+                                <th>@Model.CultureStrings["Unit"]</th>
+                                <th>@Model.CultureStrings["StockQuantity"]</th>
+                                <th>@Model.CultureStrings["OrderQuantity"]</th>
+                                <th>@Model.CultureStrings["Cost"]</th>
                             </tr>
-                        }
-                        <tr>
-                            <td colspan="7" style="text-align: right;">@Model.CultureStrings["Total"]</td>
-                            <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, Model.CalculatedOrder.Sum(item => item.Cost))</td>
-                        </tr>
-                        <tr></tr>
-                    </tbody>
-                </table>
-                <table class="table">
-                    <thead>
-                        <tr><th>@Model.CultureStrings["Actions"]</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr>
+                        </thead>
+                        <tbody>
 
-                            <td colspan="8" style="display: flex;">
-                                <input type="hidden" name="customerId" value="@Model.CustomerId" />
-                                <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
-                                <button type="submit" formaction="?handler=CalculateCosts" style="margin-right: 10px;" class="btn btn-outline-primary">@Model.CultureStrings["Calculate"]</button>
-                                <button type="submit" formaction="?handler=SubmitOrder" style="margin-right: 10px;" class="btn btn-outline-success">@Model.CultureStrings["Send"]</button>
-                                <label class="col-form-label-lg" for="pickUpName" style="margin-right: 10px;">@Model.CultureStrings["Collector"]: </label>
-                                <input type="text" id="pickUpName" name="pickUpName" value="@(Model.OrderDetails.FirstOrDefault()?.PickUpName ?? @Model.CultureStrings["SelfCollector"])" />
-                                <label class="col-form-label-lg" for="userName" style="margin-left: 10px; margin-right: 10px;">@Model.CultureStrings["ServiceWorker"]: </label>
-                                <input type="text" id="username" name="userName" value="@(Model.OrderDetails.FirstOrDefault()?.UserName ?? @Model.CultureStrings["ServiceWorker"] + " 1")" />
-                                <button type="submit" formaction="?handler=CancelAction" style="margin-left: 30px;" class="btn btn-outline-primary">@Model.CultureStrings["Cancel"]</button>
-                            </td>
-                            
-                        </tr>
-                    </tbody>
-                </table>
+                            @foreach (var product in Model.ProductList)
+                            {
+                                var orderItem = Model.CalculatedOrder.FirstOrDefault(o => o.ProductId == product.ID);
+                                <tr>
+                                    <td>@product.ID</td>
+                                    <td>@product.ProductName</td>
+                                    <td style="white-space: nowrap">@BasePageModel.FormatAsEuro(product.Price)</td>
+                                    <td>@product.Size</td>
+                                    <td style="white-space: nowrap">@product.Unit</td>
+                                    <td>@product.Inventory</td>
+                                    <td>
+                                        <input type="number" min="0" name="orderQuantity[@product.ID]" id="quantity_@product.ID" value="@orderItem?.Quantity" />
+                                    </td>
+                                    <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, orderItem?.Cost)</td>
+                                </tr>
+                            }
+                            <tr>
+                                <td colspan="7" style="text-align: right;">@Model.CultureStrings["Total"]</td>
+                                <td style="text-align: right;">@BasePageModel.FormatAsEuro(null, Model.CalculatedOrder.Sum(item => item.Cost))</td>
+                            </tr>
+                            <tr></tr>
+                        </tbody>
+                    </table>
+                    <table class="table">
+                        <thead>
+                            <tr><th>@Model.CultureStrings["Actions"]</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+
+                                <td colspan="8" style="display: flex;">
+                                    <input type="hidden" name="customerId" value="@Model.CustomerId" />
+                                    <input type="hidden" name="orderNumber" value="@Model.OrderNumber" />
+                                    <button type="submit" formaction="?handler=CalculateCosts" style="margin-right: 10px;" class="btn btn-outline-primary">@Model.CultureStrings["Calculate"]</button>
+                                    <button type="submit" formaction="?handler=SubmitOrder" style="margin-right: 10px;" class="btn btn-outline-success">@Model.CultureStrings["Send"]</button>
+                                    <label class="col-form-label-lg" for="pickUpName" style="margin-right: 10px;">@Model.CultureStrings["Collector"]: </label>
+                                    <input type="text" id="pickUpName" name="pickUpName" value="@(Model.OrderDetails.FirstOrDefault()?.PickUpName ?? @Model.CultureStrings["SelfCollector"])" />
+                                    <label class="col-form-label-lg" for="userName" style="margin-left: 10px; margin-right: 10px;">@Model.CultureStrings["ServiceWorker"]: </label>
+                                    <input type="text" id="username" name="userName" value="@(Model.OrderDetails.FirstOrDefault()?.UserName ?? @Model.CultureStrings["ServiceWorker"] + " 1")" />
+                                    <button type="submit" formaction="?handler=CancelAction" style="margin-left: 30px;" class="btn btn-outline-primary">@Model.CultureStrings["Cancel"]</button>
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
                 </form>
             }
             else
